@@ -1,0 +1,37 @@
+{
+  "name": "volcanoPlot",
+  "version": "1.0.0",
+  "description": "Linked Volcano Plots",
+  "main": "./src/index.js",
+  "scripts": {
+    "build": "npm run format && npm run bundle && prettier --single-quote --tab-width=4 --print-width=100 --write ./build/volcanoPlot.js",
+    "bundle": "rollup -c",
+    "format": "prettier --single-quote --tab-width=4 --print-width=100 --write \"./src/**/*.js\"",
+    "watch": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RhoInc/volcano-plot.git"
+  },
+  "keywords": [
+    "volcano plot"
+  ],
+  "author": "Rho, Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RhoInc/volcano-plot/issues"
+  },
+  "homepage": "https://github.com/RhoInc/volcano-plot#readme",
+  "dependencies": {
+      "d3": "~3",
+      "webcharts": "~1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.0.0",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "rollup": "^0.41.6",
+    "rollup-plugin-babel": "^2.4.0",
+    "rollup-watch": "~3.2.2",
+    "prettier":"~1"
+  }
+}
