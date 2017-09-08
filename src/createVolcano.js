@@ -1,7 +1,14 @@
+import { init } from './volcano/init';
+import { makeScales } from './volcano/makeScales';
+import { layout } from './volcano/layout';
+
 export function createVolcano(element = 'body', config) {
     var volcano = {
         element: element,
-        config: config
+        config: config,
+        init: init,
+        makeScales: makeScales,
+        layout: layout
     };
 
     volcano.events = {
