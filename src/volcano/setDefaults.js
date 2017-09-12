@@ -1,6 +1,8 @@
 import { defaultSettings as defaults } from './defaultSettings.js';
 
 export function setDefaults(settings) {
+    settings.p_col = settings.p_col ? settings.p_col : defaults.p_col;
+    settings.ratio_col = settings.ratio_col ? settings.ratio_col : defaults.ratio_col;
     settings.height = settings.height ? settings.height : defaults.height;
     settings.width = settings.width ? settings.width : defaults.width;
     settings.margin = settings.margin ? settings.margin : defaults.margin;

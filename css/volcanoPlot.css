@@ -1,0 +1,25 @@
+div.volcanoPlot{
+	display:inline-block;
+}
+
+/* Axis formatting */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+/* button formatting */
+div.controls ul {
+	list-style:none;
+}
+
+div.controls ul li{
+	display:inline-block;
+}
+
+g.brush rect.extent{
+	stroke:"#bbb";
+	fill-opacity:0.1;
+}

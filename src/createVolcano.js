@@ -1,6 +1,9 @@
 import { init } from './volcano/init';
 import { makeScales } from './volcano/makeScales';
+import { makeCleanData } from './volcano/makeCleanData.js';
+import { makeNestedData } from './volcano/makeNestedData.js';
 import { layout } from './volcano/layout';
+import { plots } from './volcano/plots';
 
 export function createVolcano(element = 'body', config) {
     var volcano = {
@@ -8,7 +11,10 @@ export function createVolcano(element = 'body', config) {
         config: config,
         init: init,
         makeScales: makeScales,
-        layout: layout
+        layout: layout,
+        makeCleanData: makeCleanData,
+        makeNestedData: makeNestedData,
+        plots: plots
     };
 
     volcano.events = {
