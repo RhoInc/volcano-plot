@@ -1,5 +1,4 @@
 export function end() {
-
     /*
     d3.selectAll("circle.point").attr("fill-opacity",0.5)
     d3.selectAll("path.hex").attr("fill-opacity",0.5)

@@ -5,6 +5,16 @@
 .ig-volcano .hidden {
     display: none !important;
 }
+/*------------------------------------------------------------------------------------------------\
+  Controls
+\------------------------------------------------------------------------------------------------*/
+
+    .ig-volcano #search {
+        float: right;
+    }
+    .ig-volcano #search input {
+        margin-left: 5px;
+    }
 
 /*------------------------------------------------------------------------------------------------\
   Plots
@@ -67,14 +77,16 @@
         border: 2px solid red;
         border-radius: 4px;
     }
-    .ig-volcano .table table tr td.header {
+    .ig-volcano .table table tr#none-selected,
+    .ig-volcano .table table tr#gimme-moar,
+    .ig-volcano .table table tr.header {
         text-align: center;
         font-weight: bold;
     }
-    .ig-volcano .table table tbody tr:nth-child(even) {
+    .ig-volcano .table table tbody tr:nth-child(even):not(#none-selected):not(#gimme-moar) {
         background: #eee;
     }
-    .ig-volcano .table table tbody tr:hover {
+    .ig-volcano .table table tbody tr:not(#none-selected):not(#gimme-moar):hover {
         background: #ccc;
     }
     .ig-volcano .table table th {
