@@ -4,6 +4,7 @@ export function start(chart) {
     var plots = chart.plots;
     var current = d3.select(this.parentNode.parentNode);
 
+    chart.wrap.classed('brushed', true);
     plots.svgs.classed('brushing', false);
     current.classed('brushing', true);
 

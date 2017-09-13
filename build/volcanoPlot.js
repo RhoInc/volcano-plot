@@ -159,11 +159,9 @@
         var data = this.data.clean;
         var settings = this.config;
         if (ids) {
-            //var idset = new Set(ids);
-            //data = data.filter(d => idset.has(d[settings.id_col]));
-
+            var idset = new Set(ids);
             data = data.filter(function(d) {
-                return ids.indexOf(d[settings.id_col]) > -1;
+                return idset.has(d[settings.id_col]);
             });
         }
 
@@ -390,6 +388,7 @@
         var plots = chart.plots;
         var current = d3.select(this.parentNode.parentNode);
 
+        chart.wrap.classed('brushed', true);
         plots.svgs.classed('brushing', false);
         current.classed('brushing', true);
 
@@ -464,16 +463,23 @@
         });
 
         //prep hex overlay data
-        chart.data.overlay = chart.makeNestedData(currentIDs);
-        chart.data.nested.forEach(function(d) {
-            if (d.key != current.data()[0].key) {
-                d.overlay = chart.data.overlay.filter(function(e) {
-                    return e.key == d.key;
-                })[0].hexData;
-            } else {
+        if (currentIDs.length) {
+            chart.data.overlay = chart.makeNestedData(currentIDs);
+            chart.data.nested.forEach(function(d) {
+                if (d.key != current.data()[0].key) {
+                    d.overlay = chart.data.overlay.filter(function(e) {
+                        return e.key == d.key;
+                    })[0].hexData;
+                } else {
+                    d.overlay = [];
+                }
+            });
+        } else {
+            chart.data.nested.forEach(function(d) {
                 d.overlay = [];
-            }
-        });
+                chart.wrap.classed('brushed', false);
+            });
+        }
 
         //draw hex overlays
         plots.svgs.each(function(d) {

@@ -24,16 +24,15 @@ g.brush rect.extent{
 	fill-opacity:0.1;
 }
 
-
-g.hexGroup *{
-	fill-opacity:.2;
+.ig-volcano.brushed g.hexGroup *{
+	fill-opacity:0.2;
 }
 
-g.hexGroup .selected{
+.ig-volcano.brushed g.hexGroup .selected{
 	fill-opacity:1;
 }
 
-g.hexGroup.overlay *{
+.ig-volcano.brushed g.hexGroup.overlay *{
 	fill-opacity:0.9;
 	stroke:black;
 }

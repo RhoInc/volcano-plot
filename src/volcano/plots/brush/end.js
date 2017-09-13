@@ -15,16 +15,23 @@ export function end(chart) {
     });
 
     //prep hex overlay data
-    chart.data.overlay = chart.makeNestedData(currentIDs);
-    chart.data.nested.forEach(function(d) {
-        if (d.key != current.data()[0].key) {
-            d.overlay = chart.data.overlay.filter(function(e) {
-                return e.key == d.key;
-            })[0].hexData;
-        } else {
+    if (currentIDs.length) {
+        chart.data.overlay = chart.makeNestedData(currentIDs);
+        chart.data.nested.forEach(function(d) {
+            if (d.key != current.data()[0].key) {
+                d.overlay = chart.data.overlay.filter(function(e) {
+                    return e.key == d.key;
+                })[0].hexData;
+            } else {
+                d.overlay = [];
+            }
+        });
+    } else {
+        chart.data.nested.forEach(function(d) {
             d.overlay = [];
-        }
-    });
+            chart.wrap.classed('brushed', false);
+        });
+    }
 
     //draw hex overlays
     plots.svgs.each(function(d) {
