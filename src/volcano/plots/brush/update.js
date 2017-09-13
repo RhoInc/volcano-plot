@@ -1,5 +1,4 @@
 export function update() {
-    console.log('brushing');
     /*
     console.log("Brushing")
       var points=chart.selectAll("circle.point");

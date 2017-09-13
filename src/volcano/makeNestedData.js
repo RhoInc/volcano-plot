@@ -12,7 +12,6 @@ export function makeNestedData() {
         .entries(data);
     nested.forEach(function(d) {
         d.hexData = chart.hexbin(d.values);
-        console.log(d.hexData);
         //Flag the groups to draw the individual points
         d.hexData.forEach(function(e) {
             e.drawCircles = e.length <= settings.hexbin.countRange.min; //draw circles (t) or hex (f)

@@ -2,6 +2,10 @@ div.volcanoPlot{
 	display:inline-block;
 }
 
+.volcanoPlot .hidden {
+    display: none !important;
+}
+
 /* Axis formatting */
 .axis path,
 .axis line {

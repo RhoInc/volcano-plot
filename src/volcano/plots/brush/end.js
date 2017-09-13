@@ -1,5 +1,4 @@
 export function end() {
-    console.log('end brushing');
 
     /*
     d3.selectAll("circle.point").attr("fill-opacity",0.5)

@@ -1,7 +1,4 @@
 export function start() {
-    console.log('start brush');
-    console.log(this);
-    console.log(d3.select(this).datum());
     /*
   d3.select(this).classed("brushing",false)
 
