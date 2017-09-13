@@ -210,7 +210,9 @@
     function init$1() {
         this.layout();
         this.drawAxis();
-        this.draw();
+        this.drawHexes();
+        this.brush.parent = this;
+        this.brush.init();
     }
 
     function layout$1() {
@@ -292,22 +294,172 @@
         });
     }
 
-    function draw() {
+    function drawHexes() {
         var chart = this.parent;
         var settings = this.parent.config;
 
-        console.log("Will draw the points and set up the brush here (It's going to be great).");
-        //plots.each(function(d){
-        //  volcano.hexMap(d, d3.select(this), settings, "main")
-        //  volcano.addBrush(d, d3.select(this), settings)
-        //})
+        chart.plots.svgs.each(function(d) {
+            //draw the main hexes/circles
+            var pointGroups = d3
+                .select(this)
+                .selectAll('g.hexGroups')
+                .data(d.hexData)
+                .enter()
+                .append('g')
+                .attr('class', 'hexGroup');
+
+            pointGroups.each(function(d) {
+                if (d.drawCircles) {
+                    d3
+                        .select(this)
+                        .selectAll('circle')
+                        .data(d)
+                        .enter()
+                        .append('circle')
+                        .attr('class', 'point')
+                        .attr('cx', function(d) {
+                            return chart.x(d[settings.ratio_col]);
+                        })
+                        .attr('cy', function(d) {
+                            return chart.y(d[settings.p_col]);
+                        })
+                        .attr('r', 2)
+                        .attr('fill', function(d) {
+                            return chart.colorScale(d[settings.colorVar]);
+                        });
+                } else {
+                    d3
+                        .select(this)
+                        .append('path')
+                        .attr('class', 'hex')
+                        .attr('d', function(d) {
+                            return chart.hexbin.hexagon(chart.radiusScale(d.size));
+                        })
+                        .attr('transform', function(d) {
+                            return 'translate(' + d.x + ',' + d.y + ')';
+                        })
+                        .attr('fill', function(d) {
+                            return d.color;
+                        });
+                }
+            });
+        });
     }
+
+    function init$2() {
+        var brush = this;
+        var plots = this.parent;
+        var chart = this.parent.parent;
+
+        chart.plots.svgs.each(function(d) {
+            d3
+                .select(this)
+                .append('g')
+                .attr('class', 'brush')
+                .call(
+                    d3.svg
+                        .brush()
+                        .x(chart.x)
+                        .y(chart.y)
+                        .on('brushstart', brush.start)
+                        .on('brush', brush.update)
+                        .on('brushend', brush.end)
+                );
+        });
+    }
+
+    function start() {
+        console.log('start brush');
+        console.log(this);
+        console.log(d3.select(this).datum());
+        /*
+  d3.select(this).classed("brushing",false)
+  d3.selectAll(".volcanoPlot svg g")
+  .classed("brushing",false)
+  chart.classed("brushing", true);
+  //clear all brushed hexes
+  d3.selectAll("g.overlayGroup").remove()
+   //clear any brush rectangles in other panels
+  d3.selectAll(".volcanoPlot svg g:not(.brushing) g.brush rect.extent")
+  .attr("height",0)
+  .attr("width",0)
+   //de-select all hexgroups
+  var points=d3.selectAll("circle.point")
+  .attr("fill-opacity",1)
+  .classed("selected",false);
+   var hexes=d3.selectAll("path.hex")
+  .attr("fill-opacity",1)
+  .classed("selected",false);
+  */
+    }
+
+    function update() {
+        console.log('brushing');
+        /*
+  console.log("Brushing")
+    var points=chart.selectAll("circle.point");
+    var hexes=chart.selectAll("path.hex");
+    var e = d3.event.target.extent();
+     //Flag selected points and hexes
+    //note - the hex data is stored in pixels, but the point data and brush data is in raw units, so we have to handle transforms accordingly.
+  points.classed("selected", function(d) {
+      return e[0][0] <= +d["fc"] && +d["fc"] <= e[1][0]
+          && e[0][1] <= +d["post"] && +d["post"] <= e[1][1];
+    });
+     hexes.classed("selected", function(d) {
+      var x_raw = settings.x.invert(d.x)
+      var y_raw = settings.y.invert(d.y)
+       return e[0][0] <= x_raw && x_raw <= e[1][0]
+        && e[0][1] <= y_raw && y_raw <= e[1][1]; // note - the order is flipped here because of the inverted pixel scale
+    });
+   //disable mouseover on unselected points
+  //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.unselected").classed("active",false)
+  //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.selected").classed("active",true)
+  */
+    }
+
+    function end() {
+        console.log('end brushing');
+
+        /*
+  d3.selectAll("circle.point").attr("fill-opacity",0.5)
+  d3.selectAll("path.hex").attr("fill-opacity",0.5)
+  //	build a data set of the selected taxa
+  var current_points=chart.selectAll("circle.selected").data()
+  var current_hexes=chart.selectAll("path.selected").data()
+  var current_hexes=d3.merge(current_hexes)
+   console.log(current_points.length)
+  console.log(current_hexes.length)
+   var currentIDs=d3.merge([current_points,current_hexes]).map(function(d){return d[settings.vars.id]})
+    //update the table
+  //drawTable(current)
+   //Draw the hex overlay
+  //var overlaydata =
+  //volcano.addHexData(overlaydata, settings, "overlay");
+   d3.selectAll("div.volcanoPlot")
+  .each(function(d){
+    d.values.forEach(function(e){
+      e.overlay = currentIDs.indexOf(e[settings.vars.id])>-1
+    })
+    volcano.addHexData([d], settings, "overlay");
+    volcano.hexMap(d, d3.select(this).select("svg g"), settings)
+  })
+  */
+    }
+
+    var brush = {
+        init: init$2,
+        start: start,
+        update: update,
+        end: end
+    };
 
     var plots = {
         init: init$1,
         layout: layout$1,
         drawAxis: drawAxis,
-        draw: draw
+        drawHexes: drawHexes,
+        brush: brush
     };
 
     function createVolcano() {

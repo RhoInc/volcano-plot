@@ -1,5 +1,7 @@
 export function init() {
     this.layout();
     this.drawAxis();
-    this.draw();
+    this.drawHexes();
+    this.brush.parent = this;
+    this.brush.init();
 }

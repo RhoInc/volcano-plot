@@ -1,4 +1,4 @@
-export function draw() {
+export function drawHexes() {
     var chart = this.parent;
     var settings = this.parent.config;
 

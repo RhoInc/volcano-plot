@@ -1,11 +1,13 @@
 import { init } from './plots/init';
 import { layout } from './plots/layout';
 import { drawAxis } from './plots/drawAxis';
-import { draw } from './plots/draw';
+import { drawHexes } from './plots/drawHexes';
+import { brush } from './plots/brush';
 
 export var plots = {
     init: init,
     layout: layout,
     drawAxis: drawAxis,
-    draw: draw
+    drawHexes: drawHexes,
+    brush: brush
 };
