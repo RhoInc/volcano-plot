@@ -1,4 +1,5 @@
 export const defaultSettings = {
+    id_col: null,
     p_col: null,
     ratio_col: null,
     reference_col: null,

@@ -1,0 +1,130 @@
+{
+  "title": "config",
+  "description":"JSON Schema for linked volcano configuration.",
+  "type": "object",
+  "id_col": {
+    "title":"id column",
+    "description":"variable name for unique identifier",
+    "type": "string",
+    "default":null
+  },
+  "p_col": {
+    "title":"p-value column",
+    "description":"variable name for p-value",
+    "type": "string",
+    "default":null
+  },
+  "ratio_col": {
+    "title":"ratio column",
+    "description":"variable name for ratio",
+    "type": "string",
+    "default":null
+  },
+  "reference_col": {
+    "title":"reference group column",
+    "description":"variable name for reference group in ratio",
+    "type": "string",
+    "default":null
+  },
+  "comparison_col": {
+    "title":"comparison group column",
+    "description":"variable name for comparison group in ratio",
+    "type": "string",
+    "default":null
+  },
+    "structure": {
+      "title":"Data Sctructure",
+      "description": "An array specifying the structure of the data filters (eg, phylum > class > order > family).",
+      "type": "array",
+      "items":{
+        "type":"string"
+      }
+    },
+    "height":{
+      "title":"plot height",
+      "description":"height in pixels for each linked chart",
+      "type":"number",
+      "default":240
+    },
+    "width":{
+      "title":"plot width",
+      "description":"width in pixels for each linked chart",
+      "type":"number",
+      "default":300
+    },
+    "margin":{
+      "title":"plot margins",
+      "description":"size in pixels of each margin for each linked chart",
+      "type":"object",
+      "left":{
+        "title":"left margin",
+        "type":"number",
+        "default":80
+      },
+      "right":{
+        "title":"right margin",
+        "type":"number",
+        "default":10
+      },
+      "top":{
+        "title":"top margin",
+        "type":"number",
+        "default":10
+      },
+      "bottom":{
+        "title":"bottom margin",
+        "type":"number",
+        "default":50
+      }
+    },
+    "ratioLimit":{
+      "title":"Ratio Limit",
+      "description":"The maxiumum ratio included on the y-axis (larger values are set to the upper limit)",
+      "type":"number",
+      "default":2.0
+    },
+    "showYAxis":{
+      "title":"Y axis visibility",
+      "type":"string",
+      "enum":["all","first"],
+      "default":"all"
+    },
+    "colorVar":{
+      "title":"color variable",
+      "description":"Variable for grouping by color",
+      "type":"string",
+    },
+    "hexbin":{
+      "title":"Hexbin settings",
+      "description":"An object used to configure the hexbin function",
+      "type":"object",
+      "radius":{
+        "title":"Hexbin radius count limits (used to set domain of size scale)",
+        "type":"object",
+        "min":{
+          "title":"minimum count to be shown in a hex (otherwise circles are drawn)",
+          "type":"number",
+          "default":3
+        },
+        "max":{
+          "title":"count for the maximum size of a hex (larger counts truncated at maximum size)",
+          "type":"number",
+          "default":10
+        }
+      },
+      "countRange":{
+        "title":"Hexbin radius size limits (used to set range of size scale)",
+        "type":"object",
+        "min":{
+          "title":"minimum size to of a hex (in pixels)",
+          "type":"number",
+          "default":3
+        },
+        "max":{
+          "title":"maximum size of a hex (in pixels)",
+          "type":"number",
+          "default":10
+        }
+      }
+    }
+}
