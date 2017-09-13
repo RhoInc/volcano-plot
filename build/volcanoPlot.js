@@ -159,6 +159,9 @@
         var data = this.data.clean;
         var settings = this.config;
         if (ids) {
+            //var idset = new Set(ids);
+            //data = data.filter(d => idset.has(d[settings.id_col]));
+
             data = data.filter(function(d) {
                 return ids.indexOf(d[settings.id_col]) > -1;
             });

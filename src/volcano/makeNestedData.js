@@ -4,7 +4,8 @@ export function makeNestedData(ids) {
     var data = this.data.clean;
     var settings = this.config;
     if (ids) {
-        data = data.filter(d => ids.indexOf(d[settings.id_col]) > -1);
+        var idset = new Set(ids);
+        data = data.filter(d => idset.has(d[settings.id_col]));
     }
 
     var nested = d3
