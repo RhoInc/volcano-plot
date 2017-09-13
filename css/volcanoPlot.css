@@ -23,3 +23,16 @@ g.brush rect.extent{
 	stroke:"#bbb";
 	fill-opacity:0.1;
 }
+
+.ig-volcano.brushed g.hexGroup *{
+	fill-opacity:0.2;
+}
+
+.ig-volcano.brushed g.hexGroup .selected{
+	fill-opacity:1;
+}
+
+.ig-volcano.brushed g.hexGroup.overlay *{
+	fill-opacity:0.9;
+	stroke:black;
+}
