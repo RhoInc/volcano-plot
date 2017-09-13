@@ -2,7 +2,8 @@ export default function layout() {
   //Selected table
     this.selected.wrap = this.parent.wrap
         .append('div')
-        .classed('table selected-table', true);
+        .classed('table', true)
+        .attr('id', 'selected-table');
     this.selected.wrap
         .append('div')
         .classed('title', true)
@@ -16,7 +17,7 @@ export default function layout() {
     this.selected.table
         .append('thead')
         .selectAll('th')
-            .data(this.selected.columns)
+            .data(this.selected.variables.map(d => d.label || d.value_col || d))
             .enter()
         .append('th')
         .text(d => d);
@@ -24,13 +25,17 @@ export default function layout() {
         .append('tbody')
         .append('tr')
         .append('td')
-        .attr('colspan', this.selected.columns.length)
+        .attr({
+            'id': 'none-selected',
+            'colspan': this.selected.variables.length
+        })
         .text('None selected');
 
   //Details table
     this.details.wrap = this.parent.wrap
         .append('div')
-        .classed('details-table', true);
+        .classed('table', true)
+        .attr('id', 'details-table');
     this.details.wrap
         .append('div')
         .classed('title', true)

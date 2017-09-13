@@ -316,26 +316,37 @@ var plots = {
 };
 
 function init$3() {
-    this.selected = { columns: ['Phylum', 'Genus', 'Details'] };
-    this.details = { columns: ['key', 'value'] };
+    this.selected = {
+        data: [],
+        variables: [{ value_col: 'phylum', label: 'Phylum' }, { value_col: 'genus', label: 'Genus' }, { value_col: 'gg_id', label: 'Details' }] };
+    this.details = {
+        data: { details: [],
+            stats: [] },
+        variables: [{ value_col: 'otu', label: 'OTU' }, { value_col: 'phylum', label: 'Phylum' }, { value_col: 'genus', label: 'Genus' }, { value_col: 'family', label: 'Family' }, { value_col: 'gg_id', label: 'Details' }] };
     this.layout();
-    this.drawSelected();
-    this.drawDetails();
+    this.drawSelected(this.parent.data.raw.filter(function (d, i) {
+        return i < 100;
+    }));
 }
 
 function layout$2() {
     //Selected table
-    this.selected.wrap = this.parent.wrap.append('div').classed('table selected-table', true);
+    this.selected.wrap = this.parent.wrap.append('div').classed('table', true).attr('id', 'selected-table');
     this.selected.wrap.append('div').classed('title', true).html('Selected Taxa (n=<span id = "nSelected">0</span>)');
     this.selected.wrap.append('div').classed('instruction', true).html('Click and drag a figure or use the search bar below to select taxa.');
     this.selected.table = this.selected.wrap.append('table');
-    this.selected.table.append('thead').selectAll('th').data(this.selected.columns).enter().append('th').text(function (d) {
+    this.selected.table.append('thead').selectAll('th').data(this.selected.variables.map(function (d) {
+        return d.label || d.value_col || d;
+    })).enter().append('th').text(function (d) {
         return d;
     });
-    this.selected.table.append('tbody').append('tr').append('td').attr('colspan', this.selected.columns.length).text('None selected');
+    this.selected.table.append('tbody').append('tr').append('td').attr({
+        'id': 'none-selected',
+        'colspan': this.selected.variables.length
+    }).text('None selected');
 
     //Details table
-    this.details.wrap = this.parent.wrap.append('div').classed('details-table', true);
+    this.details.wrap = this.parent.wrap.append('div').classed('table', true).attr('id', 'details-table');
     this.details.wrap.append('div').classed('title', true).text('Details');
     this.details.wrap.append('div').classed('instruction', true).html('Mouse over the figure or summary table for taxa details.');
     this.details.table = this.details.wrap.append('table');
@@ -343,11 +354,74 @@ function layout$2() {
     this.details.table.append('tbody');
 }
 
-function drawSelected() {
-    console.log(this.parent.data);
+function onClick(d, tables) {
+    d3.select(this).classed('active', true);
+    tables.drawDetails(d);
 }
 
-function drawDetails() {}
+function drawSelected(data) {
+    this.selected.data = data;
+    this.selected.wrap.select('#nSelected').text(data.length);
+    this.selected.wrap.select('#none-selected').style('display', data.length ? 'none' : 'table-row');
+    var tables = this,
+        rows = this.selected.table.select('tbody').selectAll('tr.selected').data(data).enter().append('tr').classed('selected', true).on('click', function (d) {
+        rows.classed('active', false);
+        onClick.call(this, d, tables);
+    });
+
+    //Append data rows.
+    rows.each(function (d) {
+        var row = d3.select(this);
+
+        row.selectAll('td').data(tables.selected.variables.map(function (variable) {
+            return d[variable.value_col];
+        })).enter().append('td').text(function (d) {
+            return d;
+        });
+    });
+}
+
+function drawDetails(datum) {
+    this.details.data.info = datum;
+    this.details.data.stats = this.parent.data.clean.filter(function (d) {
+        return d.gg_id === datum.gg_id;
+    });
+    this.details.table.selectAll('tbody tr').remove();
+    var infoHeader = this.details.table.select('tbody').append('tr').append('td').classed('header', true).attr({
+        'id': 'info-header',
+        'colspan': 2
+    }).text('Taxa Information'),
+        infoRows = this.details.table.select('tbody').selectAll('tr.info').data(this.details.variables).enter().append('tr').classed('info', true),
+        statsHeader = this.details.table.select('tbody').append('tr').append('td').classed('header', true).attr({
+        'id': 'info-header',
+        'colspan': 2
+    }).text('Risk Ratios'),
+        statsRows = this.details.table.select('tbody').selectAll('tr.stats').data(this.details.data.stats).enter().append('tr').classed('stats', true);
+
+    //Append info rows.
+    infoRows.each(function (d) {
+        var row = d3.select(this);
+
+        row.append('td').text(function (d) {
+            return d.label || d.value_col || d;
+        });
+        row.append('td').text(function (d) {
+            return datum[d.value_col || d];
+        });
+    });
+
+    //Append stats rows.
+    statsRows.each(function (d) {
+        var row = d3.select(this);
+
+        row.append('td').text(function (d) {
+            return d.plotName;
+        });
+        row.append('td').text(function (d) {
+            return d3.format('.2f')(+d.fc) + ' (p=' + d3.format('.5f')(+d.p) + ')';
+        });
+    });
+}
 
 var tables = {
     init: init$3,
