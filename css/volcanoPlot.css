@@ -23,3 +23,17 @@ g.brush rect.extent{
 	stroke:"#bbb";
 	fill-opacity:0.1;
 }
+
+
+g.hexGroup *{
+	fill-opacity:.2;
+}
+
+g.hexGroup .selected{
+	fill-opacity:1;
+}
+
+g.hexGroup.overlay *{
+	fill-opacity:0.9;
+	stroke:black;
+}
