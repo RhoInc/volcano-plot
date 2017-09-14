@@ -4,9 +4,10 @@
   "description": "Linked Volcano Plots",
   "main": "./src/index.js",
   "scripts": {
-    "build": "npm run format && npm run bundle && prettier --single-quote --tab-width=4 --print-width=100 --write ./build/volcanoPlot.js",
+    "build": "npm run format && npm run bundle && npm run format-build",
     "bundle": "rollup -c",
     "format": "prettier --single-quote --tab-width=4 --print-width=100 --write \"./src/**/*.js\"",
+    "format-build": "prettier --single-quote --tab-width=4 --print-width=100 --write ./build/volcanoPlot.js",
     "watch": "rollup -c -w"
   },
   "repository": {
@@ -29,9 +30,9 @@
   "devDependencies": {
     "babel-cli": "^6.0.0",
     "babel-preset-es2015-rollup": "^1.1.1",
+    "prettier":"~1",
     "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.4.0",
-    "rollup-watch": "~3.2.2",
-    "prettier":"~1"
+    "rollup-watch": "~3.2.2"
   }
 }

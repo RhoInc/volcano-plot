@@ -13,9 +13,15 @@ export function init() {
                     .brush()
                     .x(chart.x)
                     .y(chart.y)
-                    .on('brushstart', brush.start)
-                    .on('brush', brush.update)
-                    .on('brushend', brush.end)
+                    .on('brushstart', function(d) {
+                        brush.start.call(this, chart);
+                    })
+                    .on('brush', function(d) {
+                        brush.update.call(this, chart);
+                    })
+                    .on('brushend', function(d) {
+                        brush.end.call(this, chart);
+                    })
             );
     });
 }

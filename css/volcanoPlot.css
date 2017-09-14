@@ -1,25 +1,122 @@
-div.volcanoPlot{
-	display:inline-block;
+.ig-volcano {
+    width: 100%;
+    padding: 1%;
 }
+.ig-volcano .hidden {
+    display: none !important;
+}
+/*------------------------------------------------------------------------------------------------\
+  Controls
+\------------------------------------------------------------------------------------------------*/
 
-/* Axis formatting */
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
+    .ig-volcano #search {
+        float: right;
+    }
+    .ig-volcano #search input {
+        margin-left: 5px;
+    }
 
-/* button formatting */
-div.controls ul {
-	list-style:none;
-}
+/*------------------------------------------------------------------------------------------------\
+  Plots
+\------------------------------------------------------------------------------------------------*/
 
-div.controls ul li{
-	display:inline-block;
-}
+    div.volcanoPlot {
+        display:inline-block;
+    }
 
-g.brush rect.extent{
-	stroke:"#bbb";
-	fill-opacity:0.1;
-}
+    /* Axis formatting */
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    /* button formatting */
+    div.controls ul {
+        list-style:none;
+    }
+    div.controls ul li {
+        display:inline-block;
+    }
+
+    /* brush formatting */
+    g.brush rect.extent {
+        stroke:"#bbb";
+        fill-opacity:0.1;
+    }
+    g.brush rect.extent{
+        stroke:"#bbb";
+        fill-opacity:0.1;
+    }
+
+    .ig-volcano.brushed g.hexGroup *{
+        fill-opacity:0.2;
+    }
+
+    .ig-volcano.brushed g.hexGroup .selected{
+        fill-opacity:1;
+    }
+
+    .ig-volcano.brushed g.hexGroup.overlay *{
+        fill-opacity:0.9;
+        stroke:black;
+    }
+
+/*------------------------------------------------------------------------------------------------\
+  Tables
+\------------------------------------------------------------------------------------------------*/
+
+    .ig-volcano .table {
+        display: inline-block;
+        padding: 5px;
+    }
+    .ig-volcano .table .instruction {
+        font-size: 75%;
+        color: gray;
+    }
+    .ig-volcano .table#selected-table {
+        width: 70%;
+    }
+    .ig-volcano .table#details-table {
+        width: 30%;
+    }
+    .ig-volcano .table .title {
+        font-size: 150%;
+    }
+    .ig-volcano .table table {
+        width: 100%;
+        font-size: .9em;
+        border-collapse: collapse;
+    }
+    .ig-volcano .table#selected-table table tr:not(#none-selected) {
+        cursor: pointer;
+    }
+    .ig-volcano .table#selected-table table tr.active {
+        border: 2px solid red;
+        border-radius: 4px;
+    }
+    .ig-volcano .table table tr#none-selected,
+    .ig-volcano .table table tr#gimme-moar,
+    .ig-volcano .table table tr.header {
+        text-align: center;
+        font-weight: bold;
+    }
+    .ig-volcano .table table tbody tr:nth-child(even):not(#none-selected):not(#gimme-moar) {
+        background: #eee;
+    }
+    .ig-volcano .table table tbody tr:not(#none-selected):not(#gimme-moar):hover {
+        background: #ccc;
+    }
+    .ig-volcano .table table th {
+        padding: .5em .5em;
+        border-bottom: 1px solid #ccc;
+        text-align: left;
+    }
+    .ig-volcano .table table th:last-child {
+    }
+    .ig-volcano .table table td {
+        padding: .25em .5em;
+    }
+    .ig-volcano .table table td:last-child {
+    }
