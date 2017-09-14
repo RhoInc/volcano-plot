@@ -198,12 +198,25 @@ function drawAxis() {
     });
 }
 
-function onMouseOver() {
+function highlightCircles() {
     console.log(this);
 }
 
-function onMouseOut() {
-    console.log(this);
+function onMouseMove(svg, coordinates) {
+    var _this = this;
+
+    var mouse = d3.mouse(svg),
+        nearby = coordinates.filter(function (d) {
+        return mouse[0] - 5 <= d.x && d.x <= mouse[0] + 5 && mouse[1] - 5 <= d.y && d.y <= mouse[1] + 5;
+    });
+    if (nearby.length) {
+        this.data.highlighted = this.data.clean.filter(function (d) {
+            return d3.merge(nearby.map(function (d) {
+                return d.ids;
+            })).indexOf(d[_this.config.id_col]) > -1;
+        });
+        highlightCircles.call(this);
+    }
 }
 
 function drawHexes() {
@@ -212,32 +225,42 @@ function drawHexes() {
     var chart = this.parent;
     var settings = this.parent.config;
     chart.plots.svgs.each(function (d) {
+        d.coordinates = [];
+
         //draw the main hexes/circles
         var pointGroups = d3.select(this).selectAll('g.hexGroups').data(overlay ? d.overlay : d.hexData).enter().append('g').attr('class', 'hexGroup').classed('overlay', overlay);
 
-        pointGroups.each(function (d) {
-            if (d.drawCircles) {
-                d3.select(this).selectAll('circle').data(d).enter().append('circle').attr('class', 'point').attr('cx', function (d) {
-                    return chart.x(d[settings.ratio_col]);
-                }).attr('cy', function (d) {
-                    return chart.y(d[settings.p_col]);
-                }).attr('r', 2).attr('fill', function (d) {
-                    return overlay ? 'white' : chart.colorScale(d[settings.color_col]);
-                }).on('mouseover', function (d) {
-                    onMouseOver.call(chart, this, d);
-                }).on('mouseout', function (d) {
-                    onMouseOut.call(chart, this, d);
+        pointGroups.each(function (di) {
+            var mark = void 0;
+            if (di.drawCircles) {
+                mark = d3.select(this).selectAll('circle').data(di).enter().append('circle').attr('class', 'point').attr('cx', function (dii) {
+                    return chart.x(dii[settings.ratio_col]);
+                }).attr('cy', function (dii) {
+                    return chart.y(dii[settings.p_col]);
+                }).attr('r', 2).attr('fill', function (dii) {
+                    return overlay ? 'white' : chart.colorScale(dii[settings.color_col]);
                 });
             } else {
-                d3.select(this).append('path').attr('class', 'hex').attr('d', function (d) {
-                    return chart.hexbin.hexagon(chart.radiusScale(d.size));
-                }).attr('transform', function (d) {
-                    return 'translate(' + d.x + ',' + d.y + ')';
-                }).attr('fill', function (d) {
-                    return overlay ? 'white' : d.color;
+                mark = d3.select(this).append('path').attr('class', 'hex').attr('d', function (dii) {
+                    return chart.hexbin.hexagon(chart.radiusScale(dii.size));
+                }).attr('transform', function (dii) {
+                    return 'translate(' + dii.x + ',' + dii.y + ')';
+                }).attr('fill', function (dii) {
+                    return overlay ? 'white' : dii.color;
                 });
             }
+
+            d.coordinates.push({
+                type: di.drawCircles ? 'circle' : 'hex',
+                ids: di.map(function (dii) {
+                    return dii[settings.id_col];
+                }),
+                x: di.x,
+                y: di.y
+            });
         });
+    }).on('mousemove', function (d) {
+        onMouseMove.call(chart, this, d.coordinates);
     });
 }
 

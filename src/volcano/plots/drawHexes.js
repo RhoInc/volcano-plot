@@ -1,10 +1,11 @@
-import onMouseOver from './drawHexes/onMouseOver';
-import onMouseOut from './drawHexes/onMouseOut';
+import onMouseMove from './drawHexes/onMouseMove';
 
 export function drawHexes(overlay = false) {
     var chart = this.parent;
     var settings = this.parent.config;
     chart.plots.svgs.each(function(d) {
+        d.coordinates = [];
+
         //draw the main hexes/circles
         var pointGroups = d3
             .select(this)
@@ -15,37 +16,42 @@ export function drawHexes(overlay = false) {
             .attr('class', 'hexGroup')
             .classed('overlay', overlay);
 
-        pointGroups.each(function(d) {
-            if (d.drawCircles) {
-                d3
-                    .select(this)
+        pointGroups.each(function(di) {
+            let mark;
+            if (di.drawCircles) {
+                mark = d3.select(this)
                     .selectAll('circle')
-                    .data(d)
+                    .data(di)
                     .enter()
                     .append('circle')
                     .attr('class', 'point')
-                    .attr('cx', d => chart.x(d[settings.ratio_col]))
-                    .attr('cy', d => chart.y(d[settings.p_col]))
+                    .attr('cx', dii => chart.x(dii[settings.ratio_col]))
+                    .attr('cy', dii => chart.y(dii[settings.p_col]))
                     .attr('r', 2)
                     .attr('fill',
-                        d => overlay
+                        dii => overlay
                             ? 'white'
-                            : chart.colorScale(d[settings.color_col]))
-                    .on('mouseover', function(d) {
-                        onMouseOver.call(chart, this, d);
-                    })
-                    .on('mouseout', function(d) {
-                        onMouseOut.call(chart, this, d);
-                    });
+                            : chart.colorScale(dii[settings.color_col]));
             } else {
-                d3
-                    .select(this)
+                mark = d3.select(this)
                     .append('path')
                     .attr('class', 'hex')
-                    .attr('d', d => chart.hexbin.hexagon(chart.radiusScale(d.size)))
-                    .attr('transform', d => 'translate(' + d.x + ',' + d.y + ')')
-                    .attr('fill', d => (overlay ? 'white' : d.color));
+                    .attr('d', dii => chart.hexbin.hexagon(chart.radiusScale(dii.size)))
+                    .attr('transform', dii => 'translate(' + dii.x + ',' + dii.y + ')')
+                    .attr('fill', dii => (overlay ? 'white' : dii.color));
             }
+
+            d.coordinates.push({
+                type: di.drawCircles
+                    ? 'circle'
+                    : 'hex',
+                ids: di.map(dii => dii[settings.id_col]),
+                x: di.x,
+                y: di.y
+            });
         });
+    })
+    .on('mousemove', function(d) {
+        onMouseMove.call(chart, this, d.coordinates);
     });
 }
