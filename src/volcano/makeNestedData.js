@@ -5,7 +5,7 @@ export function makeNestedData(ids) {
     var settings = this.config;
     if (ids) {
         var idset = new Set(ids);
-        data = data.filter(d => idset.has(d[settings.id_col]));
+        data = data.filter(d => idset.has(d[settings.id_col.value_col]));
     }
 
     //Attach brushed data to data object.

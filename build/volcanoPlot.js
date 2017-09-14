@@ -27,8 +27,16 @@
         }
     };
 
+    function objectify(col) {
+        if (typeof col === 'string') {
+            return { value_col: col, label: col };
+        } else {
+            return col;
+        }
+    }
+
     function setDefaults(settings) {
-        settings.id_col = settings.id_col ? settings.id_col : defaultSettings.id_col;
+        settings.id_col = objectify(settings.id_col ? settings.id_col : defaultSettings.id_col);
         settings.p_col = settings.p_col ? settings.p_col : defaultSettings.p_col;
         settings.ratio_col = settings.ratio_col ? settings.ratio_col : defaultSettings.ratio_col;
         settings.height = settings.height ? settings.height : defaultSettings.height;
@@ -36,11 +44,20 @@
         settings.margin = settings.margin ? settings.margin : defaultSettings.margin;
         settings.showYaxis = settings.showYaxis ? settings.showYaxis : defaultSettings.showYaxis;
         settings.structure_cols = settings.structure_cols ? settings.structure_cols : [];
+        settings.structure_cols = settings.structure_cols.map(function(m) {
+            return objectify(m);
+        });
+
+        settings.detail_cols = settings.detail_cols ? settings.detail_cols : [];
+        settings.detail_cols = settings.detail_cols.map(function(m) {
+            return objectify(m);
+        });
         settings.color_col = settings.color_col
             ? settings.color_col
             : settings.structure_cols.length >= 1
-              ? settings.structure_cols[0].value_col || settings.structure_cols[0]
+              ? settings.structure_cols[0].value_col
               : defaultSettings.color_col;
+
         settings.ratioLimit = settings.ratioLimit
             ? settings.ratioLimit
             : defaultSettings.ratioLimit;
@@ -51,6 +68,7 @@
         settings.hexbin.countRange = settings.hexbin.countRange
             ? settings.hexbin.countRange
             : defaultSettings.hexbin.countRange;
+        console.log(settings);
 
         return settings;
     }
@@ -167,7 +185,7 @@
         if (ids) {
             var idset = new Set(ids);
             data = data.filter(function(d) {
-                return idset.has(d[settings.id_col]);
+                return idset.has(d[settings.id_col.value_col]);
             });
         }
 
@@ -463,7 +481,7 @@
         var current_hexes = current.selectAll('path.selected').data();
         var current_hexes = d3.merge(current_hexes);
         var currentIDs = d3.merge([current_points, current_hexes]).map(function(d) {
-            return d[settings.id_col];
+            return d[settings.id_col.value_col];
         });
 
         //prep hex overlay data
@@ -530,21 +548,21 @@
         this.selected.variables = d3.merge([
             [
                 {
-                    value_col: settings.id_col.value_col || settings.id_col,
-                    label: settings.id_col.label || settings.id_col.value_col || settings.id_col
+                    value_col: settings.id_col.value_col,
+                    label: settings.id_col.label
                 }
             ],
             settings.structure_cols.map(function(structure_col) {
                 return {
-                    value_col: structure_col.value_col || structure_col,
-                    label: structure_col.label || structure_col.value_col || structure_col
+                    value_col: structure_col.value_col,
+                    label: structure_col.label
                 };
             }),
             settings.detail_cols
                 ? settings.detail_cols.map(function(detail_col) {
                       return {
-                          value_col: detail_col.value_col || detail_col,
-                          label: detail_col.label || detail_col.value_col || detail_col
+                          value_col: detail_col.value_col,
+                          label: detail_col.label
                       };
                   })
                 : []
@@ -769,10 +787,7 @@
         if (datum) {
             this.details.data.info = datum;
             this.details.data.stats = this.parent.data.clean.filter(function(d) {
-                return (
-                    d[settings.id_col.value_col || settings.id_col] ==
-                    datum[settings.id_col.value_col || settings.id_col]
-                );
+                return d[settings.id_col.value_col] == datum[settings.id_col.value_col];
             });
             var infoHeader = this.details.table
                     .select('tbody')
