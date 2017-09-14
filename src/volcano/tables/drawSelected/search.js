@@ -15,4 +15,5 @@ export default function search(value) {
               })
             : [];
     this.drawSelected(this.parent.data.searched);
+    this.drawDetails();
 }

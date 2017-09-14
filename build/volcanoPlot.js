@@ -568,6 +568,7 @@
                   })
                 : [];
         this.drawSelected(this.parent.data.searched);
+        this.drawDetails();
     }
 
     function layout$2() {
@@ -722,65 +723,72 @@
     }
 
     function drawDetails(datum) {
-        this.details.data.info = datum;
-        this.details.data.stats = this.parent.data.clean.filter(function(d) {
-            return d.gg_id === datum.gg_id;
-        });
         this.details.table.selectAll('tbody tr').remove();
-        var infoHeader = this.details.table
-                .select('tbody')
-                .append('tr')
-                .classed('header', true)
-                .attr('id', 'info-header')
-                .append('td')
-                .attr('colspan', 2)
-                .text('Taxa Information'),
-            infoRows = this.details.table
-                .select('tbody')
-                .selectAll('tr.info')
-                .data(this.details.variables)
-                .enter()
-                .append('tr')
-                .classed('info', true),
-            statsHeader = this.details.table
-                .select('tbody')
-                .append('tr')
-                .classed('header', true)
-                .attr('id', 'info-header')
-                .append('td')
-                .attr('colspan', 2)
-                .text('Risk Ratios'),
-            statsRows = this.details.table
-                .select('tbody')
-                .selectAll('tr.stats')
-                .data(this.details.data.stats)
-                .enter()
-                .append('tr')
-                .classed('stats', true);
 
-        //Append info rows.
-        infoRows.each(function(d) {
-            var row = d3.select(this);
+        //Draw table if datum is supplied.
+        if (datum) {
+            this.details.data.info = datum;
+            this.details.data.stats = this.parent.data.clean.filter(function(d) {
+                return d.gg_id === datum.gg_id;
+            });
+            var infoHeader = this.details.table
+                    .select('tbody')
+                    .append('tr')
+                    .classed('header', true)
+                    .attr('id', 'info-header')
+                    .append('td')
+                    .attr('colspan', 2)
+                    .text('Taxa Information'),
+                infoRows = this.details.table
+                    .select('tbody')
+                    .selectAll('tr.info')
+                    .data(this.details.variables)
+                    .enter()
+                    .append('tr')
+                    .classed('info', true),
+                statsHeader = this.details.table
+                    .select('tbody')
+                    .append('tr')
+                    .classed('header', true)
+                    .attr('id', 'info-header')
+                    .append('td')
+                    .attr('colspan', 2)
+                    .text('Risk Ratios'),
+                statsRows = this.details.table
+                    .select('tbody')
+                    .selectAll('tr.stats')
+                    .data(this.details.data.stats)
+                    .enter()
+                    .append('tr')
+                    .classed('stats', true);
 
-            row.append('td').text(function(d) {
-                return d.label || d.value_col || d;
-            });
-            row.append('td').text(function(d) {
-                return datum[d.value_col || d];
-            });
-        });
+            //Append info rows.
+            infoRows.each(function(d) {
+                var row = d3.select(this);
 
-        //Append stats rows.
-        statsRows.each(function(d) {
-            var row = d3.select(this);
+                row.append('td').text(function(d) {
+                    return d.label || d.value_col || d;
+                });
+                row.append('td').text(function(d) {
+                    return datum[d.value_col || d];
+                });
+            });
 
-            row.append('td').text(function(d) {
-                return d.plotName;
+            //Append stats rows.
+            statsRows.each(function(d) {
+                var row = d3.select(this);
+
+                row.append('td').text(function(d) {
+                    return d.plotName;
+                });
+                row.append('td').text(function(d) {
+                    return d3.format('.2f')(+d.fc) + ' (p=' + d3.format('.5f')(+d.p) + ')';
+                });
             });
-            row.append('td').text(function(d) {
-                return d3.format('.2f')(+d.fc) + ' (p=' + d3.format('.5f')(+d.p) + ')';
-            });
-        });
+        } else {
+            delete this.details.data.info;
+            delete this.details.data.stats;
+        }
     }
 
     var tables = {
