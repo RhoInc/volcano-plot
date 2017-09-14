@@ -13,12 +13,13 @@
         ratio_col: null,
         reference_col: null,
         comparison_col: null,
+        structure_cols: [],
+        detail_cols: [],
+        color_col: null,
         height: 240,
         width: 300,
         margin: { top: 10, right: 10, bottom: 50, left: 80 },
         showYaxis: 'all',
-        structure: [],
-        colorVar: '',
         ratioLimit: 2.0,
         hexbin: {
             radius: { min: 3, max: 10 },
@@ -34,10 +35,12 @@
         settings.width = settings.width ? settings.width : defaultSettings.width;
         settings.margin = settings.margin ? settings.margin : defaultSettings.margin;
         settings.showYaxis = settings.showYaxis ? settings.showYaxis : defaultSettings.showYaxis;
-        settings.structure = settings.structure ? settings.structure : [];
-        settings.colorVar = settings.colorVar
-            ? settings.colorVar
-            : settings.structure.length >= 1 ? settings.structure[0] : defaultSettings.colorVar;
+        settings.structure_cols = settings.structure_cols ? settings.structure_cols : [];
+        settings.color_col = settings.color_col
+            ? settings.color_col
+            : settings.structure_cols.length >= 1
+              ? settings.structure_cols[0].value_col || settings.structure_cols[0]
+              : defaultSettings.color_col;
         settings.ratioLimit = settings.ratioLimit
             ? settings.ratioLimit
             : defaultSettings.ratioLimit;
@@ -114,7 +117,7 @@
                 d3
                     .set(
                         this.data.clean.map(function(d) {
-                            return d[settings.colorVar];
+                            return d[settings.color_col];
                         })
                     )
                     .values()
@@ -193,7 +196,7 @@
                 e.levels = d3
                     .nest()
                     .key(function(d) {
-                        return d[settings.colorVar];
+                        return d[settings.color_col];
                     })
                     .rollup(function(d) {
                         return d.length;
@@ -338,7 +341,7 @@
                         })
                         .attr('r', 2)
                         .attr('fill', function(d) {
-                            return overlay ? 'white' : chart.colorScale(d[settings.colorVar]);
+                            return overlay ? 'white' : chart.colorScale(d[settings.color_col]);
                         });
                 } else {
                     d3
@@ -517,28 +520,29 @@
     };
 
     function init$3() {
+        var settings = this.parent.config;
         this.selected = {
             data: [],
-            variables: [
-                { value_col: 'phylum', label: 'Phylum' },
-                { value_col: 'genus', label: 'Genus' },
-                { value_col: 'gg_id', label: 'Details' }
-            ],
             multiplier: 1
         };
+
+        this.selected.variables = d3.merge([
+            [settings.id_col],
+            settings.structure_cols,
+            settings.detail_cols
+        ]);
         this.details = {
             data: {
                 details: [],
                 stats: []
-            },
-            variables: [
-                { value_col: 'otu', label: 'OTU' },
-                { value_col: 'phylum', label: 'Phylum' },
-                { value_col: 'genus', label: 'Genus' },
-                { value_col: 'family', label: 'Family' },
-                { value_col: 'gg_id', label: 'Details' }
-            ]
+            }
         };
+        this.details.variables = d3.merge([
+            [settings.id_col],
+            settings.structure_cols,
+            settings.detail_cols
+        ]);
+        console.log(this);
         this.layout();
     }
 
@@ -606,11 +610,11 @@
         this.selected.wrap
             .append('div')
             .classed('title', true)
-            .html('Selected Taxa (n=<span class = "nSelected">0</span>)');
+            .html('Selected comparisons (n=<span class = "nSelected">0</span>)');
         this.selected.wrap
             .append('div')
             .classed('instruction', true)
-            .html('Click and drag a figure or use the search bar below to select taxa.');
+            .html('Click and drag a figure or use the search bar below to select comparisons.');
 
         //Search box
         this.selected.searchBox = this.selected.wrap.append('div').attr('id', 'search');
@@ -725,7 +729,7 @@
                 .selectAll('td')
                 .data(
                     tables.selected.variables.map(function(variable) {
-                        return d[variable.value_col];
+                        return d[variable.value_col] || d[variable];
                     })
                 )
                 .enter()
@@ -742,13 +746,15 @@
     }
 
     function drawDetails(datum) {
+        var settings = this.parent.config;
+        console.log(settings);
         this.details.table.selectAll('tbody tr').remove();
 
         //Draw table if datum is supplied.
         if (datum) {
             this.details.data.info = datum;
-            this.details.data.stats = this.parent.data.clean.filter(function(d) {
-                return d.gg_id === datum.gg_id;
+            this.details.data.stats = this.parent.data.clean.splice(5).filter(function(d) {
+                return d[settings.id_col] == datum[settings.id_col];
             });
             var infoHeader = this.details.table
                     .select('tbody')
@@ -757,7 +763,7 @@
                     .attr('id', 'info-header')
                     .append('td')
                     .attr('colspan', 2)
-                    .text('Taxa Information'),
+                    .text('Comparison Information'),
                 infoRows = this.details.table
                     .select('tbody')
                     .selectAll('tr.info')
@@ -796,12 +802,16 @@
             //Append stats rows.
             statsRows.each(function(d) {
                 var row = d3.select(this);
-
                 row.append('td').text(function(d) {
                     return d.plotName;
                 });
                 row.append('td').text(function(d) {
-                    return d3.format('.2f')(+d.fc) + ' (p=' + d3.format('.5f')(+d.p) + ')';
+                    return (
+                        d3.format('.2f')(d[settings.ratio_col]) +
+                        ' (p=' +
+                        d3.format('.5f')(d[settings.p_col]) +
+                        ')'
+                    );
                 });
             });
         } else {

@@ -11,7 +11,9 @@ export function setDefaults(settings) {
     settings.structure_cols = settings.structure_cols ? settings.structure_cols : [];
     settings.color_col = settings.color_col
         ? settings.color_col
-        : settings.structure_cols.length >= 1 ? settings.structure_cols[0] : defaults.color_col;
+        : settings.structure_cols.length >= 1
+          ? settings.structure_cols[0].value_col || settings.structure_cols[0]
+          : defaults.color_col;
     settings.ratioLimit = settings.ratioLimit ? settings.ratioLimit : defaults.ratioLimit;
     settings.hexbin = settings.hexbin ? settings.hexbin : {};
     settings.hexbin.radius = settings.hexbin.radius

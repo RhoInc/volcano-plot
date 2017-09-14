@@ -28,7 +28,7 @@ export default function drawSelected(data) {
 
         row
             .selectAll('td')
-            .data(tables.selected.variables.map(variable => d[variable.value_col]))
+            .data(tables.selected.variables.map(variable => d[variable.value_col] || d[variable]))
             .enter()
             .append('td')
             .text(d => d);

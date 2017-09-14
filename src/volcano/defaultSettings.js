@@ -5,6 +5,7 @@ export const defaultSettings = {
     reference_col: null,
     comparison_col: null,
     structure_cols: [],
+    detail_cols: [],
     color_col: null,
     height: 240,
     width: 300,
