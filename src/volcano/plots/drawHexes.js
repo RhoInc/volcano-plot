@@ -1,3 +1,6 @@
+import onMouseOver from './drawHexes/onMouseOver';
+import onMouseOut from './drawHexes/onMouseOut';
+
 export function drawHexes(overlay = false) {
     var chart = this.parent;
     var settings = this.parent.config;
@@ -24,10 +27,16 @@ export function drawHexes(overlay = false) {
                     .attr('cx', d => chart.x(d[settings.ratio_col]))
                     .attr('cy', d => chart.y(d[settings.p_col]))
                     .attr('r', 2)
-                    .attr(
-                        'fill',
-                        d => (overlay ? 'white' : chart.colorScale(d[settings.color_col]))
-                    );
+                    .attr('fill',
+                        d => overlay
+                            ? 'white'
+                            : chart.colorScale(d[settings.color_col]))
+                    .on('mouseover', function(d) {
+                        onMouseOver.call(chart, this, d);
+                    })
+                    .on('mouseout', function(d) {
+                        onMouseOut.call(chart, this, d);
+                    });
             } else {
                 d3
                     .select(this)
