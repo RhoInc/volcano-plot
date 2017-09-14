@@ -2,6 +2,7 @@ import onClick from './drawSelected/onClick';
 export default function drawSelected(data) {
     this.selected.data = data;
     this.selected.wrap.selectAll('.nSelected').text(data.length);
+    this.selected.wrap.select('#nDisplayed').text(25*this.selected.multiplier);
     this.selected.table.selectAll('tbody tr:not(#none-selected):not(#gimme-moar)').remove();
     this.selected.table.select('#none-selected').classed('hidden', data.length);
     this.selected.multiplier = data.length < 25 ? 1 : this.selected.multiplier;

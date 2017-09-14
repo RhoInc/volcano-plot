@@ -14,7 +14,15 @@ export function end(chart) {
 
     //prep hex overlay data
     if (currentIDs.length) {
+      //Nest brushed data.
         chart.data.overlay = chart.makeNestedData(currentIDs);
+
+      //Draw brushed data.
+        chart.tables.drawSelected.multiplier = 1;
+        chart.tables.drawSelected(chart.data.brushed);
+        chart.tables.drawDetails();
+
+      //Clear brush?
         chart.data.nested.forEach(function(d) {
             if (d.key != current.data()[0].key) {
                 d.overlay = chart.data.overlay.filter(function(e) {
@@ -29,6 +37,11 @@ export function end(chart) {
             d.overlay = [];
             chart.wrap.classed('brushed', false);
         });
+
+      //Clear tables.
+        chart.tables.drawSelected.multiplier = 1;
+        chart.tables.drawSelected([]);
+        chart.tables.drawDetails();
     }
 
     //draw hex overlays
