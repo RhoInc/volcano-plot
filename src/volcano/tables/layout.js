@@ -55,7 +55,7 @@ export default function layout() {
         .append('td')
         .attr('colspan', this.selected.variables.length)
         .html(
-            'Table displays 25 of <span class = "nSelected">0</span> rows. Click here to view 25 more rows.'
+            'Table displays <span id = "nDisplayed">25</span> of <span class = "nSelected">0</span> rows. Click here to view 25 more rows.'
         )
         .on('click', () => {
             this.selected.multiplier += 1;
