@@ -5,7 +5,7 @@ export default function drawDetails(datum) {
     //Draw table if datum is supplied.
     if (datum) {
         this.details.data.info = datum;
-        this.details.data.stats = this.parent.data.clean.splice(5).filter(function(d) {
+        this.details.data.stats = this.parent.data.clean.filter(function(d) {
             return (
                 d[settings.id_col.value_col || settings.id_col] ==
                 datum[settings.id_col.value_col || settings.id_col]
