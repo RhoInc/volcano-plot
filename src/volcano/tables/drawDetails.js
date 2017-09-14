@@ -1,13 +1,15 @@
 export default function drawDetails(datum) {
     const settings = this.parent.config;
-    console.log(settings);
     this.details.table.selectAll('tbody tr').remove();
 
     //Draw table if datum is supplied.
     if (datum) {
         this.details.data.info = datum;
         this.details.data.stats = this.parent.data.clean.splice(5).filter(function(d) {
-            return d[settings.id_col] == datum[settings.id_col];
+            return (
+                d[settings.id_col.value_col || settings.id_col] ==
+                datum[settings.id_col.value_col || settings.id_col]
+            );
         });
         const infoHeader = this.details.table
                 .select('tbody')
@@ -44,8 +46,8 @@ export default function drawDetails(datum) {
         infoRows.each(function(d) {
             const row = d3.select(this);
 
-            row.append('td').text(d => d.label || d.value_col || d);
-            row.append('td').text(d => datum[d.value_col || d]);
+            row.append('td').text(d => d.label);
+            row.append('td').text(d => datum[d.value_col]);
         });
 
         //Append stats rows.

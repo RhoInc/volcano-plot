@@ -521,28 +521,44 @@
 
     function init$3() {
         var settings = this.parent.config;
+
         this.selected = {
             data: [],
             multiplier: 1
         };
 
         this.selected.variables = d3.merge([
-            [settings.id_col],
-            settings.structure_cols,
+            [
+                {
+                    value_col: settings.id_col.value_col || settings.id_col,
+                    label: settings.id_col.label || settings.id_col.value_col || settings.id_col
+                }
+            ],
+            settings.structure_cols.map(function(structure_col) {
+                return {
+                    value_col: structure_col.value_col || structure_col,
+                    label: structure_col.label || structure_col.value_col || structure_col
+                };
+            }),
             settings.detail_cols
+                ? settings.detail_cols.map(function(detail_col) {
+                      return {
+                          value_col: detail_col.value_col || detail_col,
+                          label: detail_col.label || detail_col.value_col || detail_col
+                      };
+                  })
+                : []
         ]);
+
         this.details = {
             data: {
                 details: [],
                 stats: []
             }
         };
-        this.details.variables = d3.merge([
-            [settings.id_col],
-            settings.structure_cols,
-            settings.detail_cols
-        ]);
-        console.log(this);
+
+        this.details.variables = this.selected.variables;
+
         this.layout();
     }
 
@@ -633,7 +649,7 @@
             .selectAll('th')
             .data(
                 this.selected.variables.map(function(d) {
-                    return d.label || d.value_col || d;
+                    return d.label;
                 })
             )
             .enter()
@@ -729,7 +745,7 @@
                 .selectAll('td')
                 .data(
                     tables.selected.variables.map(function(variable) {
-                        return d[variable.value_col] || d[variable];
+                        return d[variable.value_col];
                     })
                 )
                 .enter()
@@ -747,14 +763,16 @@
 
     function drawDetails(datum) {
         var settings = this.parent.config;
-        console.log(settings);
         this.details.table.selectAll('tbody tr').remove();
 
         //Draw table if datum is supplied.
         if (datum) {
             this.details.data.info = datum;
             this.details.data.stats = this.parent.data.clean.splice(5).filter(function(d) {
-                return d[settings.id_col] == datum[settings.id_col];
+                return (
+                    d[settings.id_col.value_col || settings.id_col] ==
+                    datum[settings.id_col.value_col || settings.id_col]
+                );
             });
             var infoHeader = this.details.table
                     .select('tbody')
@@ -792,10 +810,10 @@
                 var row = d3.select(this);
 
                 row.append('td').text(function(d) {
-                    return d.label || d.value_col || d;
+                    return d.label;
                 });
                 row.append('td').text(function(d) {
-                    return datum[d.value_col || d];
+                    return datum[d.value_col];
                 });
             });
 

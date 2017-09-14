@@ -36,7 +36,7 @@ export default function layout() {
     this.selected.table
         .append('thead')
         .selectAll('th')
-        .data(this.selected.variables.map(d => d.label || d.value_col || d))
+        .data(this.selected.variables.map(d => d.label))
         .enter()
         .append('th')
         .text(d => d);
