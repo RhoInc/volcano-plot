@@ -1,5 +1,4 @@
 export function end(chart) {
-
     var brush = chart.plots.brush;
     var settings = chart.config;
     var plots = chart.plots;

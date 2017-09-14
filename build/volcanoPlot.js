@@ -383,7 +383,6 @@
     }
 
     function start(chart) {
-        console.log('start brush');
         var brush = chart.plots.brush;
         var plots = chart.plots;
         var current = d3.select(this.parentNode.parentNode);
@@ -414,7 +413,6 @@
     }
 
     function update(chart) {
-        console.log('brushing');
         var brush = chart.plots.brush;
         var settings = chart.config;
         var plots = chart.plots;
@@ -447,8 +445,6 @@
     }
 
     function end(chart) {
-        console.log('end brushing');
-
         var brush = chart.plots.brush;
         var settings = chart.config;
         var plots = chart.plots;
