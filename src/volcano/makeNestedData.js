@@ -8,7 +8,7 @@ export function makeNestedData(ids) {
         data = data.filter(d => idset.has(d[settings.id_col]));
     }
 
-  //Attach brushed data to data object.
+    //Attach brushed data to data object.
     chart.data.brushed = data;
 
     var nested = d3
@@ -33,7 +33,7 @@ export function makeNestedData(ids) {
             e.levels = d3
                 .nest()
                 .key(function(d) {
-                    return d[settings.colorVar];
+                    return d[settings.color_col];
                 })
                 .rollup(function(d) {
                     return d.length;

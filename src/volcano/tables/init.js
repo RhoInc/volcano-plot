@@ -1,25 +1,26 @@
 export default function init() {
+    const settings = this.parent.config;
     this.selected = {
         data: [],
-        variables: [
-            { value_col: 'phylum', label: 'Phylum' },
-            { value_col: 'genus', label: 'Genus' },
-            { value_col: 'gg_id', label: 'Details' }
-        ],
         multiplier: 1
     };
+
+    this.selected.variables = d3.merge([
+        [settings.id_col],
+        settings.structure_cols,
+        settings.detail_cols
+    ]);
     this.details = {
         data: {
             details: [],
             stats: []
-        },
-        variables: [
-            { value_col: 'otu', label: 'OTU' },
-            { value_col: 'phylum', label: 'Phylum' },
-            { value_col: 'genus', label: 'Genus' },
-            { value_col: 'family', label: 'Family' },
-            { value_col: 'gg_id', label: 'Details' }
-        ]
+        }
     };
+    this.details.variables = d3.merge([
+        [settings.id_col],
+        settings.structure_cols,
+        settings.detail_cols
+    ]);
+    console.log(this);
     this.layout();
 }

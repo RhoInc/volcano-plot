@@ -1,10 +1,14 @@
 export default function drawDetails(datum) {
+    const settings = this.parent.config;
+    console.log(settings);
     this.details.table.selectAll('tbody tr').remove();
 
     //Draw table if datum is supplied.
     if (datum) {
         this.details.data.info = datum;
-        this.details.data.stats = this.parent.data.clean.filter(d => d.gg_id === datum.gg_id);
+        this.details.data.stats = this.parent.data.clean.splice(5).filter(function(d) {
+            return d[settings.id_col] == datum[settings.id_col];
+        });
         const infoHeader = this.details.table
                 .select('tbody')
                 .append('tr')
@@ -12,7 +16,7 @@ export default function drawDetails(datum) {
                 .attr('id', 'info-header')
                 .append('td')
                 .attr('colspan', 2)
-                .text('Taxa Information'),
+                .text('Comparison Information'),
             infoRows = this.details.table
                 .select('tbody')
                 .selectAll('tr.info')
@@ -47,9 +51,16 @@ export default function drawDetails(datum) {
         //Append stats rows.
         statsRows.each(function(d) {
             const row = d3.select(this);
-
             row.append('td').text(d => d.plotName);
-            row.append('td').text(d => `${d3.format('.2f')(+d.fc)} (p=${d3.format('.5f')(+d.p)})`);
+            row
+                .append('td')
+                .text(
+                    d =>
+                        d3.format('.2f')(d[settings.ratio_col]) +
+                        ' (p=' +
+                        d3.format('.5f')(d[settings.p_col]) +
+                        ')'
+                );
         });
     } else {
         delete this.details.data.info;
