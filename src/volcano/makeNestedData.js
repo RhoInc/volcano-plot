@@ -1,8 +1,12 @@
-export function makeNestedData() {
+export function makeNestedData(ids) {
     //convenience mappings
     var chart = this;
     var data = this.data.clean;
     var settings = this.config;
+    if (ids) {
+        var idset = new Set(ids);
+        data = data.filter(d => idset.has(d[settings.id_col]));
+    }
 
     var nested = d3
         .nest()

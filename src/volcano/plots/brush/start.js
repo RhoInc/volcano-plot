@@ -1,27 +1,29 @@
-export function start() {
-    /*
-  d3.select(this).classed("brushing",false)
+export function start(chart) {
+    var brush = chart.plots.brush;
+    var plots = chart.plots;
+    var current = d3.select(this.parentNode.parentNode);
 
-  d3.selectAll(".volcanoPlot svg g")
-  .classed("brushing",false)
+    chart.wrap.classed('brushed', true);
+    plots.svgs.classed('brushing', false);
+    current.classed('brushing', true);
 
-  chart.classed("brushing", true);
-
-  //clear all brushed hexes
-  d3.selectAll("g.overlayGroup").remove()
+    //clear all brushed hexes
+    d3.selectAll('g.hexGroup.overlay').remove();
 
     //clear any brush rectangles in other panels
-  d3.selectAll(".volcanoPlot svg g:not(.brushing) g.brush rect.extent")
-  .attr("height",0)
-  .attr("width",0)
+    chart.plots.svgs
+        .selectAll('g:not(.brushing) g.brush rect.extent')
+        .attr('height', 0)
+        .attr('width', 0);
 
     //de-select all hexgroups
-    var points=d3.selectAll("circle.point")
-    .attr("fill-opacity",1)
-    .classed("selected",false);
+    var points = chart.plots.svgs
+        .selectAll('circle.point')
+        .attr('fill-opacity', 1)
+        .classed('selected', false);
 
-    var hexes=d3.selectAll("path.hex")
-  .attr("fill-opacity",1)
-    .classed("selected",false);
-    */
+    var hexes = chart.plots.svgs
+        .selectAll('path.hex')
+        .attr('fill-opacity', 1)
+        .classed('selected', false);
 }

@@ -154,11 +154,17 @@
         return clean;
     }
 
-    function makeNestedData() {
+    function makeNestedData(ids) {
         //convenience mappings
         var chart = this;
         var data = this.data.clean;
         var settings = this.config;
+        if (ids) {
+            var idset = new Set(ids);
+            data = data.filter(function(d) {
+                return idset.has(d[settings.id_col]);
+            });
+        }
 
         var nested = d3
             .nest()
@@ -295,18 +301,20 @@
     }
 
     function drawHexes() {
+        var overlay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
         var chart = this.parent;
         var settings = this.parent.config;
-
         chart.plots.svgs.each(function(d) {
             //draw the main hexes/circles
             var pointGroups = d3
                 .select(this)
                 .selectAll('g.hexGroups')
-                .data(d.hexData)
+                .data(overlay ? d.overlay : d.hexData)
                 .enter()
                 .append('g')
-                .attr('class', 'hexGroup');
+                .attr('class', 'hexGroup')
+                .classed('overlay', overlay);
 
             pointGroups.each(function(d) {
                 if (d.drawCircles) {
@@ -325,7 +333,7 @@
                         })
                         .attr('r', 2)
                         .attr('fill', function(d) {
-                            return chart.colorScale(d[settings.colorVar]);
+                            return overlay ? 'white' : chart.colorScale(d[settings.colorVar]);
                         });
                 } else {
                     d3
@@ -339,7 +347,7 @@
                             return 'translate(' + d.x + ',' + d.y + ')';
                         })
                         .attr('fill', function(d) {
-                            return d.color;
+                            return overlay ? 'white' : d.color;
                         });
                 }
             });
@@ -361,84 +369,122 @@
                         .brush()
                         .x(chart.x)
                         .y(chart.y)
-                        .on('brushstart', brush.start)
-                        .on('brush', brush.update)
-                        .on('brushend', brush.end)
+                        .on('brushstart', function(d) {
+                            brush.start.call(this, chart);
+                        })
+                        .on('brush', function(d) {
+                            brush.update.call(this, chart);
+                        })
+                        .on('brushend', function(d) {
+                            brush.end.call(this, chart);
+                        })
                 );
         });
     }
 
-    function start() {
-        /*
-  d3.select(this).classed("brushing",false)
-  d3.selectAll(".volcanoPlot svg g")
-  .classed("brushing",false)
-  chart.classed("brushing", true);
-  //clear all brushed hexes
-  d3.selectAll("g.overlayGroup").remove()
-    //clear any brush rectangles in other panels
-  d3.selectAll(".volcanoPlot svg g:not(.brushing) g.brush rect.extent")
-  .attr("height",0)
-  .attr("width",0)
-    //de-select all hexgroups
-  var points=d3.selectAll("circle.point")
-  .attr("fill-opacity",1)
-  .classed("selected",false);
-    var hexes=d3.selectAll("path.hex")
-  .attr("fill-opacity",1)
-  .classed("selected",false);
-  */
+    function start(chart) {
+        console.log('start brush');
+        var brush = chart.plots.brush;
+        var plots = chart.plots;
+        var current = d3.select(this.parentNode.parentNode);
+
+        chart.wrap.classed('brushed', true);
+        plots.svgs.classed('brushing', false);
+        current.classed('brushing', true);
+
+        //clear all brushed hexes
+        d3.selectAll('g.hexGroup.overlay').remove();
+
+        //clear any brush rectangles in other panels
+        chart.plots.svgs
+            .selectAll('g:not(.brushing) g.brush rect.extent')
+            .attr('height', 0)
+            .attr('width', 0);
+
+        //de-select all hexgroups
+        var points = chart.plots.svgs
+            .selectAll('circle.point')
+            .attr('fill-opacity', 1)
+            .classed('selected', false);
+
+        var hexes = chart.plots.svgs
+            .selectAll('path.hex')
+            .attr('fill-opacity', 1)
+            .classed('selected', false);
     }
 
-    function update() {
-        /*
-    console.log("Brushing")
-      var points=chart.selectAll("circle.point");
-      var hexes=chart.selectAll("path.hex");
-      var e = d3.event.target.extent();
+    function update(chart) {
+        console.log('brushing');
+        var brush = chart.plots.brush;
+        var settings = chart.config;
+        var plots = chart.plots;
+        var current = d3.select(this.parentNode.parentNode);
+        var points = current.selectAll('circle.point');
+        var hexes = current.selectAll('path.hex');
+        var e = d3.event.target.extent();
+
         //Flag selected points and hexes
-      //note - the hex data is stored in pixels, but the point data and brush data is in raw units, so we have to handle transforms accordingly.
-    points.classed("selected", function(d) {
-        return e[0][0] <= +d["fc"] && +d["fc"] <= e[1][0]
-            && e[0][1] <= +d["post"] && +d["post"] <= e[1][1];
-      });
-        hexes.classed("selected", function(d) {
-        var x_raw = settings.x.invert(d.x)
-        var y_raw = settings.y.invert(d.y)
-          return e[0][0] <= x_raw && x_raw <= e[1][0]
-          && e[0][1] <= y_raw && y_raw <= e[1][1]; // note - the order is flipped here because of the inverted pixel scale
-      });
-      //disable mouseover on unselected points
-    //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.unselected").classed("active",false)
-    //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.selected").classed("active",true)
-    */
+        //note - the hex data is stored in pixels, but the point data and brush data is in raw units, so we have to handle transforms accordingly.
+        points.classed('selected', function(d) {
+            return (
+                e[0][0] <= +d[settings.ratio_col] &&
+                +d[settings.ratio_col] <= e[1][0] &&
+                e[0][1] <= +d[settings.p_col] &&
+                +d[settings.p_col] <= e[1][1]
+            );
+        });
+
+        hexes.classed('selected', function(d) {
+            var x_raw = chart.x.invert(d.x);
+            var y_raw = chart.y.invert(d.y);
+
+            return e[0][0] <= x_raw && x_raw <= e[1][0] && e[0][1] <= y_raw && y_raw <= e[1][1]; // note - the order is flipped here because of the inverted pixel scale
+        });
+
+        //disable mouseover on unselected points
+        //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.unselected").classed("active",false)
+        //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.selected").classed("active",true)
     }
 
-    function end() {
-        /*
-    d3.selectAll("circle.point").attr("fill-opacity",0.5)
-    d3.selectAll("path.hex").attr("fill-opacity",0.5)
-    //	build a data set of the selected taxa
-    var current_points=chart.selectAll("circle.selected").data()
-    var current_hexes=chart.selectAll("path.selected").data()
-    var current_hexes=d3.merge(current_hexes)
-      console.log(current_points.length)
-    console.log(current_hexes.length)
-      var currentIDs=d3.merge([current_points,current_hexes]).map(function(d){return d[settings.vars.id]})
-        //update the table
-    //drawTable(current)
-      //Draw the hex overlay
-    //var overlaydata =
-    //volcano.addHexData(overlaydata, settings, "overlay");
-      d3.selectAll("div.volcanoPlot")
-    .each(function(d){
-      d.values.forEach(function(e){
-        e.overlay = currentIDs.indexOf(e[settings.vars.id])>-1
-      })
-      volcano.addHexData([d], settings, "overlay");
-      volcano.hexMap(d, d3.select(this).select("svg g"), settings)
-    })
-    */
+    function end(chart) {
+        console.log('end brushing');
+
+        var brush = chart.plots.brush;
+        var settings = chart.config;
+        var plots = chart.plots;
+        var current = d3.select(this.parentNode.parentNode);
+
+        //	build a data set of the selected taxa
+        var current_points = current.selectAll('circle.selected').data();
+        var current_hexes = current.selectAll('path.selected').data();
+        var current_hexes = d3.merge(current_hexes);
+        var currentIDs = d3.merge([current_points, current_hexes]).map(function(d) {
+            return d[settings.id_col];
+        });
+
+        //prep hex overlay data
+        if (currentIDs.length) {
+            chart.data.overlay = chart.makeNestedData(currentIDs);
+            chart.data.nested.forEach(function(d) {
+                if (d.key != current.data()[0].key) {
+                    d.overlay = chart.data.overlay.filter(function(e) {
+                        return e.key == d.key;
+                    })[0].hexData;
+                } else {
+                    d.overlay = [];
+                }
+            });
+        } else {
+            chart.data.nested.forEach(function(d) {
+                d.overlay = [];
+                chart.wrap.classed('brushed', false);
+            });
+        }
+
+        //draw hex overlays
+        plots.svgs.each(function(d) {
+            chart.plots.drawHexes(true);
+        });
     }
 
     var brush = {
