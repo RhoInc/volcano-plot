@@ -1,8 +1,15 @@
-export function makeNestedData() {
+export function makeNestedData(ids) {
     //convenience mappings
     var chart = this;
     var data = this.data.clean;
     var settings = this.config;
+    if (ids) {
+        var idset = new Set(ids);
+        data = data.filter(d => idset.has(d[settings.id_col]));
+    }
+
+  //Attach brushed data to data object.
+    chart.data.brushed = data;
 
     var nested = d3
         .nest()
@@ -12,7 +19,6 @@ export function makeNestedData() {
         .entries(data);
     nested.forEach(function(d) {
         d.hexData = chart.hexbin(d.values);
-        console.log(d.hexData);
         //Flag the groups to draw the individual points
         d.hexData.forEach(function(e) {
             e.drawCircles = e.length <= settings.hexbin.countRange.min; //draw circles (t) or hex (f)

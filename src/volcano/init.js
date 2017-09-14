@@ -18,5 +18,6 @@ export function init(data) {
     this.plots.parent = this;
     this.plots.init();
 
-    console.log(this);
+    this.tables.parent = this;
+    this.tables.init();
 }
