@@ -78,12 +78,14 @@
             .select(this.element)
             .append('div')
             .attr('class', 'ig-volcano');
-
-        this.config = setDefaults(this.config);
-        this.layout();
-
         this.data = {};
         this.data.raw = data;
+
+        this.config = setDefaults(this.config);
+        this.checkCols();
+
+        this.layout();
+
         this.data.clean = this.makeCleanData();
         this.makeScales();
         this.data.nested = this.makeNestedData();
@@ -162,17 +164,32 @@
         var data = this.data.raw;
         var settings = this.config;
 
-        var clean = data.map(function(d) {
-            d.plotName = d[settings.comparison_col] + ' vs. ' + d[settings.reference_col];
-            d[settings.p_col] = +d[settings.p_col];
-            d[settings.ratio_col] = +d[settings.ratio_col];
-            if (d[settings.ratio_col] > settings.ratioLimit) {
-                d.origRatio = d[settings.ratio_col];
-                d[settings.ratio_col] = +settings.ratioLimit;
-                d.aboveLimit = true;
-            }
-            return d;
-        });
+        var clean = data
+            .map(function(d) {
+                d.plotName = d[settings.comparison_col] + ' vs. ' + d[settings.reference_col];
+                d[settings.p_col] = d[settings.p_col] == '' ? NaN : +d[settings.p_col];
+                d[settings.ratio_col] = d[settings.ratio_col] == '' ? NaN : +d[settings.ratio_col];
+                if (d[settings.ratio_col] > settings.ratioLimit) {
+                    d.origRatio = d[settings.ratio_col];
+                    d[settings.ratio_col] = +settings.ratioLimit;
+                    d.aboveLimit = true;
+                }
+                return d;
+            })
+            .filter(function(d) {
+                return d[settings.p_col] || d[settings.p_col] === 0;
+            })
+            .filter(function(d) {
+                return d[settings.ratio_col] || d[settings.ratio_col] === 0;
+            });
+
+        if (clean.length < data.length) {
+            var diff = data.length - clean.length;
+            console.warn(
+                diff +
+                    ' rows removed because of missing or invalid data for ratio and/or p-values. Numeric values are required. Did you have p<0.05 or something similar?'
+            );
+        }
 
         return clean;
     }
@@ -228,6 +245,43 @@
             });
         });
         return nested;
+    }
+
+    function checkCols() {
+        function objectify(col) {
+            if (typeof col === 'string') {
+                return { value_col: col, label: col };
+            } else {
+                return col;
+            }
+        }
+        var colNames = Object.keys(this.data.raw[0]);
+        var settings = this.config;
+        var settingObjs = d3
+            .merge([
+                [
+                    settings.id_col,
+                    settings.p_col,
+                    settings.ratio_col,
+                    settings.reference_col,
+                    settings.comparison_col,
+                    settings.color_col
+                ],
+                settings.structure_cols,
+                settings.detail_cols
+            ])
+            .map(function(m) {
+                return objectify(m);
+            });
+        settingObjs.forEach(function(col) {
+            if (colNames.indexOf(col.value_col) == -1) {
+                console.warn(
+                    "'" +
+                        col.value_col +
+                        "' column not found in the submitted data. Errors are likely."
+                );
+            }
+        });
     }
 
     function layout() {
@@ -872,6 +926,7 @@
             layout: layout,
             makeCleanData: makeCleanData,
             makeNestedData: makeNestedData,
+            checkCols: checkCols,
             plots: plots,
             tables: tables
         };
