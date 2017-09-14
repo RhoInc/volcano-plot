@@ -15,11 +15,11 @@ export default function layout() {
     this.selected.wrap
         .append('div')
         .classed('title', true)
-        .html('Selected Taxa (n=<span class = "nSelected">0</span>)');
+        .html('Selected comparisons (n=<span class = "nSelected">0</span>)');
     this.selected.wrap
         .append('div')
         .classed('instruction', true)
-        .html('Click and drag a figure or use the search bar below to select taxa.');
+        .html('Click and drag a figure or use the search bar below to select comparisons.');
 
     //Search box
     this.selected.searchBox = this.selected.wrap.append('div').attr('id', 'search');

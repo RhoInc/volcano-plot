@@ -33,7 +33,7 @@ export function makeNestedData(ids) {
             e.levels = d3
                 .nest()
                 .key(function(d) {
-                    return d[settings.colorVar];
+                    return d[settings.color_col];
                 })
                 .rollup(function(d) {
                     return d.length;

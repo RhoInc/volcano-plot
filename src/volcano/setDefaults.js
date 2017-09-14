@@ -8,10 +8,10 @@ export function setDefaults(settings) {
     settings.width = settings.width ? settings.width : defaults.width;
     settings.margin = settings.margin ? settings.margin : defaults.margin;
     settings.showYaxis = settings.showYaxis ? settings.showYaxis : defaults.showYaxis;
-    settings.structure = settings.structure ? settings.structure : [];
-    settings.colorVar = settings.colorVar
-        ? settings.colorVar
-        : settings.structure.length >= 1 ? settings.structure[0] : defaults.colorVar;
+    settings.structure_cols = settings.structure_cols ? settings.structure_cols : [];
+    settings.color_col = settings.color_col
+        ? settings.color_col
+        : settings.structure_cols.length >= 1 ? settings.structure_cols[0] : defaults.color_col;
     settings.ratioLimit = settings.ratioLimit ? settings.ratioLimit : defaults.ratioLimit;
     settings.hexbin = settings.hexbin ? settings.hexbin : {};
     settings.hexbin.radius = settings.hexbin.radius

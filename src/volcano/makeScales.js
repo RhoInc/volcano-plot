@@ -38,7 +38,7 @@ export function makeScales() {
             d3
                 .set(
                     this.data.clean.map(function(d) {
-                        return d[settings.colorVar];
+                        return d[settings.color_col];
                     })
                 )
                 .values()
