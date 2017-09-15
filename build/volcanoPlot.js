@@ -91,6 +91,7 @@
         this.layout();
 
         this.data.clean = this.makeCleanData();
+        this.data.filtered = this.data.clean; //no filters on initial render;
         this.data.levels = this.makeLevelData();
         this.makeScales();
         this.data.nested = this.makeNestedData();
@@ -203,7 +204,7 @@
     function makeNestedData(ids) {
         //convenience mappings
         var chart = this;
-        var data = this.data.clean;
+        var data = this.data.filtered;
         var settings = this.config;
         if (ids) {
             var idset = new Set(ids);
@@ -247,7 +248,10 @@
                 e.levels.sort(function(a, b) {
                     return b.values - a.values;
                 });
-                e.color = chart.colorScale(e.levels[0].key);
+                e.color =
+                    chart.colorScale.domain().indexOf(e.levels[0].key) > -1
+                        ? chart.colorScale(e.levels[0].key)
+                        : '#999';
             });
         });
         return nested;
@@ -433,7 +437,11 @@
                         })
                         .attr('r', 2)
                         .attr('fill', function(d) {
-                            return overlay ? 'white' : chart.colorScale(d[settings.color_col]);
+                            return overlay
+                                ? 'white'
+                                : chart.colorScale.domain().indexOf(d[settings.color_col]) > -1
+                                  ? chart.colorScale(d[settings.color_col])
+                                  : '#999';
                         });
                 } else {
                     d3
@@ -579,15 +587,21 @@
                 }
             });
         } else {
+            chart.wrap.classed('brushed', false);
             chart.data.nested.forEach(function(d) {
                 d.overlay = [];
-                chart.wrap.classed('brushed', false);
             });
 
             //Clear tables.
             chart.tables.drawSelected.multiplier = 1;
             chart.tables.drawSelected([]);
             chart.tables.drawDetails();
+
+            chart.wrap
+                .selectAll('g.brush')
+                .select('rect.extent')
+                .attr('height', 0)
+                .attr('width', 0);
         }
 
         //draw hex overlays
@@ -604,8 +618,25 @@
     };
 
     function update$1() {
-        //this.drawHexes();
-        //this.brush.init();
+        //clear stuff
+        var chart = this.parent;
+        var settings = this.parent.config;
+        chart.plots.wrap.selectAll('g.hexGroup').remove();
+        chart.tables.drawSelected.multiplier = 1;
+        chart.tables.drawSelected([]);
+        chart.tables.drawDetails();
+        chart.wrap.classed('brushed', false);
+        chart.wrap
+            .selectAll('g.brush')
+            .select('rect.extent')
+            .attr('height', 0)
+            .attr('width', 0);
+
+        //bind the new data
+        chart.plots.svgs.data(chart.data.nested, function(d) {
+            return d.key;
+        });
+        this.drawHexes();
     }
 
     var plots = {
@@ -1014,9 +1045,10 @@
 
         filters.list.lis.on('click', function(d) {
             chart.data.filtered = chart.data.clean.filter(function(f) {
-                return f[filters.list.var] == d;
+                return f[settings.color_col] == d.key;
             });
-            chart.plot.update();
+            chart.data.nested = chart.makeNestedData();
+            chart.plots.update();
         });
     }
 
@@ -1048,8 +1080,12 @@
                     })
                     .slice(0, 10)
             );
-
             controls.makeList();
+
+            //update charts
+            chart.data.filtered = chart.data.clean;
+            chart.data.nested = chart.makeNestedData();
+            chart.plots.update();
         });
     }
 

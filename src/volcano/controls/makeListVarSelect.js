@@ -18,7 +18,11 @@ export function makeListVarSelect() {
         settings.color_col = this.value;
         chart.data.levels = chart.makeLevelData();
         chart.colorScale.domain(chart.data.levels.map(m => m.key).slice(0, 10));
-
         controls.makeList();
+
+        //update charts
+        chart.data.filtered = chart.data.clean;
+        chart.data.nested = chart.makeNestedData();
+        chart.plots.update();
     });
 }

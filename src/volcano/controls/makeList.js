@@ -20,7 +20,8 @@ export function makeList() {
         );
 
     filters.list.lis.on('click', function(d) {
-        chart.data.filtered = chart.data.clean.filter(f => f[filters.list.var] == d);
-        chart.plot.update();
+        chart.data.filtered = chart.data.clean.filter(f => f[settings.color_col] == d.key);
+        chart.data.nested = chart.makeNestedData();
+        chart.plots.update();
     });
 }

@@ -1,7 +1,7 @@
 export function makeNestedData(ids) {
     //convenience mappings
     var chart = this;
-    var data = this.data.clean;
+    var data = this.data.filtered;
     var settings = this.config;
     if (ids) {
         var idset = new Set(ids);
@@ -43,7 +43,10 @@ export function makeNestedData(ids) {
             e.levels.sort(function(a, b) {
                 return b.values - a.values;
             });
-            e.color = chart.colorScale(e.levels[0].key);
+            e.color =
+                chart.colorScale.domain().indexOf(e.levels[0].key) > -1
+                    ? chart.colorScale(e.levels[0].key)
+                    : '#999';
         });
     });
     return nested;
