@@ -22,18 +22,18 @@ class DatasetModel extends BaseModel {
   }
 
   getDataDir(db, id) {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
     
       return this.getById(db, id)
       .then( dataset => {
-        resolve(path.resolve(path.join(config.get('data.path'), dataset.code)));
+        resolve(path.resolve(path.join(config.get('data.path'), id.toString())));
       });
 
     });
   }
 
   getDataPath(db, id, type='raw') {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
     
       return this.getDataDir(db, id)
       .then( dataDir => {
@@ -44,7 +44,7 @@ class DatasetModel extends BaseModel {
   }
 
   getDataStream(db, id, type='raw') {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
     
       return this.getDataPath(db, id, type)
       .then( dataPath => {
@@ -55,6 +55,92 @@ class DatasetModel extends BaseModel {
 
         resolve(fs.createReadStream(dataPath, {encoding: 'utf8'}));
       });
+    });
+  }
+
+  add(db, obj, upfile) {
+    return new Promise((resolve, reject) => {
+
+      if (!upfile) {
+        reject('no file found to save');
+        return;
+      }
+
+      obj.dt_uploaded = new Date();
+      obj.original_filename = upfile.filename;
+      super.add(db, obj)
+      .then( savedObj => {
+
+        if (!savedObj) {
+          reject('save failure');
+          return;
+        }
+
+        this.saveUploadedFile(savedObj.id, upfile)
+        .then( success => {
+          resolve(savedObj);
+        });
+
+      })
+      .catch( err => {
+        log.debug(`ds add error: ${err}`);
+        reject(err); 
+      });
+    
+    });
+  }
+
+  update(db, id, changes, upfile) {
+    return new Promise((resolve, reject) => {
+
+      if (upfile) {
+        changes.dt_uploaded = new Date();
+        changes.original_filename = upfile.filename;
+      }
+
+      super.update(db, id, changes)
+      .then( savedObj => {
+
+        if (!upfile) {
+          resolve(savedObj);
+          return;
+        }
+
+        this.saveUploadedFile(savedObj.id, upfile)
+        .then( success => {
+          resolve(savedObj);
+        });
+
+      })
+      .catch( err => {
+        log.debug(`ds update error: ${err}`);
+        reject(err); 
+      });
+    
+    });
+  }
+
+  /**
+   * FIXME: no error checking, all synchronous calls
+   */
+  saveUploadedFile(dirname, upfile) {
+    return new Promise((resolve, reject) => {
+
+      if (!fs.existsSync(upfile.file)) {
+        reject('source file not found');
+        return;
+      }
+
+      let targetDir = path.join(config.get('data.path'), dirname.toString());
+      if (!fs.existsSync(targetDir))
+        fs.mkdirSync(targetDir);
+
+      let targetPath = path.join(targetDir, 'raw');
+      //log.debug(`saving from ${upfile.file} to ${targetPath}`);
+
+      require('fs-extra').copySync(upfile.file, targetPath);
+      resolve(targetPath);
+
     });
   }
 

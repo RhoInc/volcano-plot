@@ -172,7 +172,7 @@ class BaseModel extends EventEmitter {
   add(db, obj) {
     return new Promise((resolve, reject) => {
  
-      if (obj._id) {
+      if (obj.id) {
         reject('attempting to add an object that has an id defined');
         return;
       }
@@ -181,15 +181,11 @@ class BaseModel extends EventEmitter {
 
       return this.save(db, null, obj)
       .then(savedObj => {
-
         resolve(savedObj);
-
       })
       .catch( err => {
-    
         log.debug(`base add error: ${err}`);
         reject(err); 
-
       });
     
     });
@@ -204,28 +200,24 @@ class BaseModel extends EventEmitter {
       this.getById(db, id)
       .then( obj => {
 
+        if (!obj) {
+          resolve();
+          return;
+        }
+
         // whoa there, sparky //
-        delete changes['_id'];
+        delete changes['id'];
 
-        let newObj = Object.assign(obj, changes);
-        //log.debug('merged obj: ' + JSON.stringify(newObj, null, 2));
-
-        return this.save(db, id, newObj)
-        .then( savedObj => { resolve(savedObj); });
-
-      });
-
-    })
-    .then( newObj => {
-
-      //log.debug('base update: heading out with ' + JSON.stringify(newObj, null, 2));
-      return newObj;
-
-    })
-    .catch( err => {
+        return this.save(db, null, changes)
+        .then(savedObj => {
+          resolve(savedObj);
+        })
+        .catch( err => {
+          log.debug(`base update error: ${err}`);
+          reject(err); 
+        });
     
-      log.error(`base update error: ${err}`);
-      reject(err); 
+      });
 
     });
   }
@@ -233,16 +225,33 @@ class BaseModel extends EventEmitter {
   save(db, id, obj) {
     return new Promise((resolve, reject) => {
 
-      log.debug(`saving ${this.table} id ${obj._id}`);
+      log.debug(`saving ${this.table} id ${obj.id}`);
 
       let valResult = this.validate(obj);
       if (valResult !== true) {
-        log.debug('object failed validation check');
+        log.debug(`${this.name} save - failed validation check`);
         reject(valResult);
         return;
       }
 
-      reject('nyi');
+      let update = (id != null);
+
+      if (!update) {
+        return db(this.table)
+        .insert(obj)
+        .then( newid => {
+      log.debug(`saved ${newid}`);
+          resolve(newid ? this.getById(db, newid) : null);
+        });
+      } else {
+        return db(this.table)
+        .where('id', id)
+        .update(obj)
+        .then( success => {
+          resolve(success ? this.getById(db, id) : null);
+        });
+      }
+
     });
   }
 

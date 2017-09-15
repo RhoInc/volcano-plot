@@ -34,13 +34,17 @@ class DatasetsRoute extends BaseRoute {
       req.util.sendBadRequest(res, 'id cannot be present in add request');
       return;
     }
+
+    //log.debug('add raw: ' + JSON.stringify(req.body, null, 2));
+
     if (!req.files) {
-      return req.util.sendBadRequest(res, 'no file specified.');
+      req.util.sendBadRequest(res, 'no file = no add');
+      return;
     }
 
-    log.debug('add raw: ' + JSON.stringify(req.body, null, 2));
+    let upf = req.files[Object.keys(req.files)[0]];
 
-    this.model.add(req.db, req.body, req.files || null)
+    this.model.add(req.db, req.body, upf)
     .then( newObj => {
       req.util.sendJSONObject(res, newObj);
     }).catch( err => {
@@ -58,46 +62,14 @@ class DatasetsRoute extends BaseRoute {
       return;
     }
 
-    this.model.update(req.db, req.params.id, req.body, req.files || null)
+    let upf = (req.files) ? req.files[Object.keys(req.files)[0]] : null;
+
+    this.model.update(req.db, req.params.id, req.body, upf)
     .then( newObj => {
       req.util.sendJSONObject(res, newObj);
     }).catch( err => {
       req.util.sendError(res, err);
     });
-  }
-
-  postFile(req, res, next) {
-    // could end up with a new id, or an existing one //
-    let finalid = null;
-
-
-    // study required //
-    if (!req.body.studyId) {
-      return req.util.sendBadRequest(res, 'Study missing from request');
-    }
-
-    // we're a file uploader. no file, no upload. //
-    if (!req.files) {
-      return req.util.sendBadRequest(res, 'No file specified.');
-    }
-
-    let fileKey = Object.keys(req.files)[0];
-    let file = req.files[fileKey];
-
-    this.model.saveFromPost(req.db, req.body, file)
-    .then( df => {
-
-      if (df)
-        req.util.sendJSONObject(res, df);
-      else
-        req.util.sendBadRequest(res, `File did not match a known data specification`);
-
-    }).catch( err => {
-
-      req.util.sendError(res, err);
-
-    });
-
   }
 
   /**
