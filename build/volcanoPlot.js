@@ -24,7 +24,8 @@
         hexbin: {
             radius: { min: 3, max: 10 },
             countRange: { min: 3, max: 100 }
-        }
+        },
+        filterTypes: ['List', 'Tree']
     };
 
     function objectify(col) {
@@ -68,7 +69,10 @@
         settings.hexbin.countRange = settings.hexbin.countRange
             ? settings.hexbin.countRange
             : defaultSettings.hexbin.countRange;
-        console.log(settings);
+
+        settings.filterTypes = settings.filterTypes
+            ? settings.filterTypes
+            : defaultSettings.filterTypes;
 
         return settings;
     }
@@ -89,6 +93,9 @@
         this.data.clean = this.makeCleanData();
         this.makeScales();
         this.data.nested = this.makeNestedData();
+
+        this.controls.parent = this;
+        this.controls.init();
 
         this.plots.parent = this;
         this.plots.init();
@@ -285,8 +292,8 @@
     }
 
     function layout() {
-        this.plots.wrap = this.wrap.append('div').attr('class', 'controls');
-        this.controls.wrap = this.wrap.append('div').attr('class', 'charts');
+        this.controls.wrap = this.wrap.append('div').attr('class', 'controls');
+        this.plots.wrap = this.wrap.append('div').attr('class', 'charts');
         this.tables.wrap = this.wrap.append('div').attr('class', 'tables');
     }
 
@@ -912,9 +919,24 @@
 
     function init$4() {
         // make Header
+        this.wrap.append('h3').text('Controls');
         // make instructions
-        // make list/tree toggle
-        // call makeList (for initial load)
+        this.wrap.append('span').text('Use selections below to filter the volcano plots');
+
+        //make FilterToggle
+        this.makeFilterToggle();
+
+        //initialize the filters
+        if (settings.filterTypes) {
+            if (settings.filterTypes[0] == 'List') {
+                this.makeList();
+            } else if (settings.filterTypes[0] == 'Tree') {
+                this.makeTree();
+            }
+        } else {
+            //or hide the controls div if filters aren't provided
+            this.wrap.classed('hidden', true);
+        }
     }
 
     function layout$3() {}
@@ -923,11 +945,49 @@
 
     function makeTree() {}
 
+    function makeFilterToggle() {
+        var controls = this;
+        var chart = this.parent;
+        var settings = this.parent.config;
+        console.log(settings);
+        this.filterToggle = {};
+        if (settings.filterTypes.length > 1) {
+            this.filterToggle.wrap = this.wrap.append('ul').attr('class', 'filterToggle');
+            var toggleOptions = this.filterToggle.wrap
+                .selectAll('li')
+                .data(settings.filterTypes)
+                .enter()
+                .append('li')
+                .append('a')
+                .text(function(d) {
+                    return d;
+                })
+                .classed('active', function(d, i) {
+                    return i == 0;
+                });
+            toggleOptions.on('click', function(d) {
+                var activeFlag = d3.select(this).classed('active');
+                if (!activeFlag) {
+                    toggleOptions.classed('active', false);
+                    controls.filterToggle.current = d;
+                    console.log(d);
+                    d3.select(this).classed('active', true);
+                    if (d == 'List') {
+                        controls.makeList();
+                    } else if (d == 'Tree') {
+                        controls.makeTree();
+                    }
+                }
+            });
+        }
+    }
+
     var controls = {
         init: init$4,
         layout: layout$3,
         makeList: makeList,
-        makeTree: makeTree
+        makeTree: makeTree,
+        makeFilterToggle: makeFilterToggle
     };
 
     function createVolcano() {

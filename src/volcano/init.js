@@ -17,6 +17,9 @@ export function init(data) {
     this.makeScales();
     this.data.nested = this.makeNestedData();
 
+    this.controls.parent = this;
+    this.controls.init();
+
     this.plots.parent = this;
     this.plots.init();
 
