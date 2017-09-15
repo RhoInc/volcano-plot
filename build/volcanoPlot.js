@@ -285,12 +285,9 @@
     }
 
     function layout() {
-        this.wrap.append('div').attr('class', 'top');
-        this.wrap.append('div').attr('class', 'middle');
-        var bottom = this.wrap.append('div').attr('class', 'bottom');
-        bottom.append('div').attr('class', 'info third');
-        bottom.append('div').attr('class', 'summarytable third');
-        bottom.append('div').attr('class', 'details third');
+        this.plots.wrap = this.wrap.append('div').attr('class', 'controls');
+        this.controls.wrap = this.wrap.append('div').attr('class', 'charts');
+        this.tables.wrap = this.wrap.append('div').attr('class', 'tables');
     }
 
     function init$1() {
@@ -305,8 +302,7 @@
         var chart = this.parent;
         var settings = this.parent.config;
 
-        chart.plots.svgs = chart.wrap
-            .select('div.middle')
+        chart.plots.svgs = chart.plots.wrap
             .selectAll('div.volcanoPlot')
             .data(chart.data.nested, function(d) {
                 return d.key;
@@ -691,7 +687,7 @@
     \-------------------------------------------------------------------------------------------**/
 
         //Header
-        this.selected.wrap = this.parent.wrap
+        this.selected.wrap = this.parent.tables.wrap
             .append('div')
             .classed('table', true)
             .attr('id', 'selected-table');
@@ -756,7 +752,7 @@
     \-------------------------------------------------------------------------------------------**/
 
         //Header
-        this.details.wrap = this.parent.wrap
+        this.details.wrap = this.parent.tables.wrap
             .append('div')
             .classed('table', true)
             .attr('id', 'details-table');
@@ -914,6 +910,26 @@
         drawDetails: drawDetails
     };
 
+    function init$4() {
+        // make Header
+        // make instructions
+        // make list/tree toggle
+        // call makeList (for initial load)
+    }
+
+    function layout$3() {}
+
+    function makeList() {}
+
+    function makeTree() {}
+
+    var controls = {
+        init: init$4,
+        layout: layout$3,
+        makeList: makeList,
+        makeTree: makeTree
+    };
+
     function createVolcano() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var config = arguments[1];
@@ -928,7 +944,8 @@
             makeNestedData: makeNestedData,
             checkCols: checkCols,
             plots: plots,
-            tables: tables
+            tables: tables,
+            controls: controls
         };
 
         volcano.events = {

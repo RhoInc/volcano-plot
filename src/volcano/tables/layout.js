@@ -8,7 +8,7 @@ export default function layout() {
     \-------------------------------------------------------------------------------------------**/
 
     //Header
-    this.selected.wrap = this.parent.wrap
+    this.selected.wrap = this.parent.tables.wrap
         .append('div')
         .classed('table', true)
         .attr('id', 'selected-table');
@@ -67,7 +67,7 @@ export default function layout() {
     \-------------------------------------------------------------------------------------------**/
 
     //Header
-    this.details.wrap = this.parent.wrap
+    this.details.wrap = this.parent.tables.wrap
         .append('div')
         .classed('table', true)
         .attr('id', 'details-table');

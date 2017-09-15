@@ -6,6 +6,7 @@ import { checkCols } from './volcano/checkCols.js';
 import { layout } from './volcano/layout';
 import { plots } from './volcano/plots';
 import { tables } from './volcano/tables';
+import { controls } from './volcano/controls';
 
 export function createVolcano(element = 'body', config) {
     var volcano = {
@@ -18,7 +19,8 @@ export function createVolcano(element = 'body', config) {
         makeNestedData: makeNestedData,
         checkCols: checkCols,
         plots: plots,
-        tables: tables
+        tables: tables,
+        controls: controls
     };
 
     volcano.events = {
