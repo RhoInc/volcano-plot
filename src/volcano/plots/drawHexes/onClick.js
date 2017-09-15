@@ -1,6 +1,4 @@
-import highlightCircles from '../../plots/drawHexes/highlightCircles';
-
-export default function onClick(row, d) {
+export default function onClick(circle, d) {
     d3.select(row).classed('clicked', true);
     this.selected.clicked = d;
     this.drawDetails(d);

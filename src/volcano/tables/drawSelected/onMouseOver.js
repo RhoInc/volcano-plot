@@ -4,7 +4,7 @@ export default function onMouseOver(row, d) {
     d3.select(row).classed('highlighted', true);
     this.drawDetails(d);
 
-  //Highlight points
+    //Highlight points
     this.parent.data.highlighted = this.parent.data.clean.filter(
         di => di[this.parent.config.id_col.value_col] === d[this.parent.config.id_col.value_col]
     );

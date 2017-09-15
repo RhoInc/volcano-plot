@@ -1,4 +1,5 @@
 import onMouseMove from './drawHexes/onMouseMove';
+import onMouseLeave from './drawHexes/onMouseLeave';
 
 export function drawHexes(overlay = false) {
     var chart = this.parent;
@@ -65,5 +66,8 @@ export function drawHexes(overlay = false) {
         })
         .on('mousemove', function(d) {
             onMouseMove.call(chart, this, d);
+        })
+        .on('mouseleave', function(d) {
+            onMouseLeave.call(chart);
         });
 }
