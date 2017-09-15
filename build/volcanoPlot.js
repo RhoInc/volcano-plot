@@ -623,8 +623,22 @@ function onMouseLeave() {
 }
 
 function onMouseOver(row, d) {
+    var _this = this;
+
     d3.select(row).classed('highlighted', true);
     this.drawDetails(d);
+
+    //Highlight points
+    this.parent.data.highlighted = this.parent.data.clean.filter(function (di) {
+        return di[_this.parent.config.id_col.value_col] === d[_this.parent.config.id_col.value_col];
+    });
+    this.parent.plots.svgs.each(function (di) {
+        return di.highlighted = _this.parent.data.highlighted.filter(function (dii) {
+            return dii.plotName === di.key;
+        });
+    });
+    this.drawDetails(this.parent.data.highlighted.pop());
+    highlightCircles.call(this.parent);
 }
 
 function onClick(row, d) {
