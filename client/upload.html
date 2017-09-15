@@ -5,24 +5,46 @@
 	<title>Volcano Upload</title>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
+  <style type="text/css">
+    .box {
+      margin-bottom: 1.5em;
+      padding: 0.5em;
+      border: solid 1px #666666;
+    }
+  </style>
 	<!-- JS libraries -->
 	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  
 </head>
 
 <body>
-  <div>
+  <div class="box">
     <form id="upform"> 
     <h3>Upload</h3>
+    File: <input id="upload" type="file" class="file">
+    <br>
     Code: <input id="upcode" type="text">
     <br>
     Name: <input id="upname" type="text">
     <br>
-    File: <input id="upload" type="file" class="file">
+    Description: <input id="updesc" type="text" size="50">
+    <br>
+    Config Object: <textarea id="upconfig" rows="10" cols="40"></textarea>
     <br>
     <input type="submit" value="Up We Go">
     </form>
   </div>
 
+  <div class="box">
+    <h3>Existing Datasets</h3>
+    <table id="currsets">
+      <thead>
+        <tr><th>ID</th><th>Code</th><th>Filename</th></tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
 </body>
 
 <script>
@@ -40,6 +62,8 @@ $("#upform").submit(function(e) {
   var formData = new FormData();
   formData.append('code', $('#upcode').val());
   formData.append('name', $('#upname').val());
+  formData.append('description', $('#updesc').val());
+  formData.append('config', $('#upconfig').val());
   formData.append('upfile', upfile, upfile.name);
 
   $.ajax({
@@ -53,5 +77,20 @@ $("#upform").submit(function(e) {
     error: function(err) { alert('err: ' + JSON.stringify(err)) }
   });
 });
+
+$.getJSON('/api/datasets')
+.done(data => {
+  data.forEach(dset => {
+    $('#currsets')
+    .append('<tr><td>'+dset.id+'</td><td>'+dset.code+'</td><td>'+dset.original_filename+'</td></tr>');
+  });
+})
+.fail(err => {
+  console.log('oof')
+});
+
+</script>
+</html>
+
 </script>
 </html>

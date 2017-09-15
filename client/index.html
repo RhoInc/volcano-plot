@@ -29,14 +29,41 @@ var settings = {
 	showYaxis:"first"
 }
 
-$.getJSON('/api/datasets/1/data.json')
-.done(data => {
-  volcano = volcanoPlot.createVolcano("body",settings)
-  volcano.init(data)
-})
-.fail(err => {
-  console.log('oof')
+$(document).ready(function() {
+  let id = 4;
+  pull(id);
 });
+
+function pull(id) {
+  $.getJSON('/api/datasets/' + id)
+  .done(metadata => {
+    var configObj = null;
+    try {
+      if (metadata.config)
+        configObj = eval("(" + metadata.config + ")");
+    } catch (ex) {
+      configObj = null;
+    }
+    if (configObj)
+      dpull(id, configObj);
+    else
+      configObj = settings;
+  })
+  .fail(err => {
+    console.log('eek')
+  });
+}
+
+function dpull(id, cfg) {
+  $.getJSON('/api/datasets/'+id+'/data.json')
+  .done(data => {
+    volcano = volcanoPlot.createVolcano('body', cfg)
+    volcano.init(data)
+  })
+  .fail(err => {
+    console.log('oof')
+  });
+}
 
 </script>
 </html>

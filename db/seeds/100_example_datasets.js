@@ -14,16 +14,10 @@ exports.seed = function(knex, Promise) {
           code: 'example1',
           name: 'Camelot',
           description: "It's only a model",
+          config: "{ not: 'now' }",
           original_filename: "mb_long.csv",
           dt_uploaded: "2017-09-14 08:00:00"
         }
-      ]);
-    }),
-
-    knex('configs').del()
-    .then(() => {
-      return knex('configs').insert([
-        {id: 1, dataset_id: 1, settings_blob: '{}'}
       ]);
     })
 
