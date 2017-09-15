@@ -1,0 +1,9 @@
+{
+  "logging": {
+    "console": {
+      "minlevel": "debug",
+      "colorize": true,
+      "humanReadableUnhandledException": true
+    }
+  }
+}

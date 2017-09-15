@@ -1,0 +1,12 @@
+{
+  "datasets": [
+    {"method": "get", "url": "/datasets", "result": "returns a list of known datasets"},
+    {"method": "get", "url": "/datasets/<id>", "result": "returns metadata for the specified dataset"},
+    {"method": "get", "url": "/datasets/<id>/headers", "result": "returns array of dataset headers"},
+    {"method": "get", "url": "/datasets/<id>/data[.json]", "result": "returns dataset raw or as json"},
+    {"method": "get", "url": "/datasets/<id>/head[.json][/<N>]", "result": "returns first N lines of dataset raw or as json"},
+    {"method": "put", "url": "/datasets/<id>", "result": "update the specified dataset metadata"},
+    {"method": "post", "url": "/datasets/<id>", "result": "replace data for the specified dataset"},
+    {"method": "post", "url": "/datasets", "result": "upload new dataset"}
+  ]
+}

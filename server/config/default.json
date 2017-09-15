@@ -1,0 +1,24 @@
+{
+  "server": {
+    "port": "8888",
+    "apiroot": "/api",
+    "clientroot": "/client",
+    "response": {
+      "compress": false,
+      "json_spaces": 2
+    }
+  },
+  "logging": {
+    "file": {
+      "minlevel": "debug",
+      "colorize": false,
+      "json": true,
+      "timestamp": true,
+      "path": ".",
+      "filename": "debug.log"
+    }
+  },
+  "data": {
+    "path": "../build/data"
+  }
+}

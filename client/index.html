@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Volcano Stub</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/css/volcanoPlot.css">
+
+	<!-- JS libraries -->
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="/lib/hexbin/hexbin.js"></script>
+  <script src="/build/volcanoPlot.js"></script>
+</head>
+
+<body></body>
+
+<script>
+var settings = {
+  reference_col:"reference",
+  comparison_col:"comparison",
+  ratio_col:"fc",
+  p_col:"post",
+  id_col:"otu",
+	structure:["phylum","class","order","family"],
+	showYaxis:"first"
+}
+
+$.getJSON('/api/datasets/1/data.json')
+.done(data => {
+  volcano = volcanoPlot.createVolcano("body",settings)
+  volcano.init(data)
+})
+.fail(err => {
+  console.log('oof')
+});
+
+</script>
+</html>
