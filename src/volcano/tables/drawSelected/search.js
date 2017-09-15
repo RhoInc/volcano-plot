@@ -14,6 +14,7 @@ export default function search(value) {
                   return match;
               })
             : [];
+    delete this.selected.clicked;
     this.drawSelected(this.parent.data.searched);
     this.drawDetails();
 }

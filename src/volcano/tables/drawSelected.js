@@ -1,4 +1,7 @@
+import onMouseLeave from './drawSelected/onMouseLeave';
+import onMouseOver from './drawSelected/onMouseOver';
 import onClick from './drawSelected/onClick';
+
 export default function drawSelected(data) {
     this.selected.data = data;
     this.selected.wrap.selectAll('.nSelected').text(data.length);
@@ -12,14 +15,21 @@ export default function drawSelected(data) {
     const tables = this,
         rows = this.selected.table
             .select('tbody')
+            .on('mouseleave', () => {
+                onMouseLeave.call(this);
+            })
             .selectAll('tr.selected')
             .data(data.filter((d, i) => i < 25 * this.selected.multiplier))
             .enter()
             .append('tr')
             .classed('selected', true)
+            .on('mouseover', function(d) {
+                rows.classed('highlighted', false);
+                onMouseOver.call(tables, this, d);
+            })
             .on('click', function(d) {
-                rows.classed('active', false);
-                onClick.call(this, d, tables);
+                rows.classed('clicked', false);
+                onClick.call(tables, this, d);
             });
 
     //Append data rows.

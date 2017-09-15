@@ -1,4 +1,5 @@
-export default function onClick(d, tables) {
-    d3.select(this).classed('active', true);
-    tables.drawDetails(d);
+export default function onClick(row, d) {
+    d3.select(row).classed('clicked', true);
+    this.selected.clicked = d;
+    this.drawDetails(d);
 }

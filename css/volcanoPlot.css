@@ -92,8 +92,12 @@
     .ig-volcano .table#selected-table table tr:not(#none-selected) {
         cursor: pointer;
     }
-    .ig-volcano .table#selected-table table tr.active {
+    .ig-volcano .table#selected-table table tr.highlighted {
         border: 2px solid red;
+        border-radius: 4px;
+    }
+    .ig-volcano .table#selected-table table tr.clicked {
+        border: 2px solid black;
         border-radius: 4px;
     }
     .ig-volcano .table table tr#none-selected,
