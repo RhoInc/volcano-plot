@@ -68,7 +68,6 @@
         settings.hexbin.countRange = settings.hexbin.countRange
             ? settings.hexbin.countRange
             : defaultSettings.hexbin.countRange;
-        console.log(settings);
 
         return settings;
     }
@@ -438,7 +437,7 @@
                     return d.distance === closest;
                 })[0];
             this.data.highlighted = this.data.clean.filter(function(d) {
-                return datum.id === d[_this.config.id_col];
+                return datum.id === d[_this.config.id_col.value_col];
             });
             this.plots.svgs.each(function(d) {
                 return (d.highlighted = _this.data.highlighted.filter(function(di) {
@@ -496,7 +495,7 @@
                         if (!overlay)
                             di.forEach(function(dii) {
                                 d.coordinates.push({
-                                    id: dii[settings.id_col],
+                                    id: dii[settings.id_col.value_col],
                                     x: di.x,
                                     y: di.y
                                 });
@@ -504,7 +503,7 @@
                         else
                             di.forEach(function(dii) {
                                 d.overlayCoordinates.push({
-                                    id: dii[settings.id_col],
+                                    id: dii[settings.id_col.value_col],
                                     x: di.x,
                                     y: di.y
                                 });

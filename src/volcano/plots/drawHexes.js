@@ -39,7 +39,7 @@ export function drawHexes(overlay = false) {
                     if (!overlay)
                         di.forEach(dii => {
                             d.coordinates.push({
-                                id: dii[settings.id_col],
+                                id: dii[settings.id_col.value_col],
                                 x: di.x,
                                 y: di.y
                             });
@@ -47,7 +47,7 @@ export function drawHexes(overlay = false) {
                     else
                         di.forEach(dii => {
                             d.overlayCoordinates.push({
-                                id: dii[settings.id_col],
+                                id: dii[settings.id_col.value_col],
                                 x: di.x,
                                 y: di.y
                             });

@@ -27,7 +27,9 @@ export default function onMouseMove(svg, d) {
     if (nearby.length) {
         const closest = d3.min(nearby, d => d.distance),
             datum = nearby.filter(d => d.distance === closest)[0];
-        this.data.highlighted = this.data.clean.filter(d => datum.id === d[this.config.id_col]);
+        this.data.highlighted = this.data.clean.filter(
+            d => datum.id === d[this.config.id_col.value_col]
+        );
         this.plots.svgs.each(
             d => (d.highlighted = this.data.highlighted.filter(di => di.plotName === d.key))
         );
