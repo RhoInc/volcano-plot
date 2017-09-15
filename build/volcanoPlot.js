@@ -923,16 +923,36 @@
         // make instructions
         this.wrap.append('span').text('Use selections below to filter the volcano plots');
 
-        //make FilterToggle
-        this.makeFilterToggle();
-
         //initialize the filters
         if (settings.filterTypes) {
-            if (settings.filterTypes[0] == 'List') {
-                this.makeList();
-            } else if (settings.filterTypes[0] == 'Tree') {
-                this.makeTree();
+            this.filters = {};
+            this.filters.parent = this;
+            this.filters.current = settings.filterTypes[0];
+            this.filters.toggle = {};
+            this.filters.toggle.wrap = this.wrap.append('div').attr('class', 'filter toggle');
+            this.filters.tree = {};
+            this.filters.tree.wrap = this.wrap.append('div').attr('class', 'filter tree');
+
+            this.filters.list = {};
+            this.filters.list.wrap = this.wrap.append('div').attr('class', 'filter list');
+
+            //initialize the filters
+            if (settings.filterTypes.length > 1) {
+                this.makeFilterToggle();
             }
+
+            if (settings.filterTypes.indexOf('List') > -1) {
+                this.makeList();
+                this.filters.list.wrap.classed('hidden', this.filters.current != 'List');
+            }
+
+            if (settings.filterTypes.indexOf('Tree') > -1) {
+                this.makeTree();
+                this.filters.tree.wrap.classed('hidden', this.filters.current != 'Tree');
+            }
+
+            console.log(this);
+            //make FilterToggle (if needed)
         } else {
             //or hide the controls div if filters aren't provided
             this.wrap.classed('hidden', true);
@@ -941,45 +961,52 @@
 
     function layout$3() {}
 
-    function makeList() {}
+    function makeList() {
+        var controls = this;
+        var filters = this.filters;
+        filters.list.wrap.append('span').text("List o' Filters");
+    }
 
-    function makeTree() {}
+    function makeTree() {
+        var controls = this;
+        var filters = this.filters;
+        filters.tree.wrap.append('span').text("Tree o' Filters");
+    }
 
     function makeFilterToggle() {
         var controls = this;
         var chart = this.parent;
         var settings = this.parent.config;
-        console.log(settings);
-        this.filterToggle = {};
-        if (settings.filterTypes.length > 1) {
-            this.filterToggle.wrap = this.wrap.append('ul').attr('class', 'filterToggle');
-            var toggleOptions = this.filterToggle.wrap
-                .selectAll('li')
-                .data(settings.filterTypes)
-                .enter()
-                .append('li')
-                .append('a')
-                .text(function(d) {
-                    return d;
-                })
-                .classed('active', function(d, i) {
-                    return i == 0;
-                });
-            toggleOptions.on('click', function(d) {
-                var activeFlag = d3.select(this).classed('active');
-                if (!activeFlag) {
-                    toggleOptions.classed('active', false);
-                    controls.filterToggle.current = d;
-                    console.log(d);
-                    d3.select(this).classed('active', true);
-                    if (d == 'List') {
-                        controls.makeList();
-                    } else if (d == 'Tree') {
-                        controls.makeTree();
-                    }
-                }
+
+        this.filters.toggle.options = this.filters.toggle.wrap
+            .selectAll('li')
+            .data(settings.filterTypes)
+            .enter()
+            .append('li')
+            .append('a')
+            .text(function(d) {
+                return d;
+            })
+            .classed('active', function(d, i) {
+                return i == 0;
             });
-        }
+        this.filters.toggle.options.on('click', function(d) {
+            var activeFlag = d3.select(this).classed('active');
+            if (!activeFlag) {
+                controls.filters.current = d;
+                controls.filters.toggle.options.classed('active', false);
+                d3.select(this).classed('active', true);
+                if (d == 'List') {
+                    console.log(controls);
+                    controls.filters.tree.wrap.classed('hidden', true);
+                    controls.filters.list.wrap.classed('hidden', false);
+                } else if (d == 'Tree') {
+                    console.log(controls.filters.tree.wrap);
+                    controls.filters.tree.wrap.classed('hidden', false);
+                    controls.filters.list.wrap.classed('hidden', true);
+                }
+            }
+        });
     }
 
     var controls = {
