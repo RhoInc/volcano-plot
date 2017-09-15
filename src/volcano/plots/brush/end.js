@@ -9,7 +9,7 @@ export function end(chart) {
     var current_hexes = current.selectAll('path.selected').data();
     var current_hexes = d3.merge(current_hexes);
     var currentIDs = d3.merge([current_points, current_hexes]).map(function(d) {
-        return d[settings.id_col];
+        return d[settings.id_col.value_col];
     });
 
     //prep hex overlay data

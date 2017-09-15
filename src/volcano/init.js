@@ -5,12 +5,14 @@ export function init(data) {
         .select(this.element)
         .append('div')
         .attr('class', 'ig-volcano');
-
-    this.config = setDefaults(this.config);
-    this.layout();
-
     this.data = {};
     this.data.raw = data;
+
+    this.config = setDefaults(this.config);
+    this.checkCols();
+
+    this.layout();
+
     this.data.clean = this.makeCleanData();
     this.makeScales();
     this.data.nested = this.makeNestedData();
