@@ -91,6 +91,7 @@
         this.layout();
 
         this.data.clean = this.makeCleanData();
+        this.data.levels = this.makeLevelData();
         this.makeScales();
         this.data.nested = this.makeNestedData();
 
@@ -141,13 +142,11 @@
             .ordinal()
             .range(d3.scale.category10().range())
             .domain(
-                d3
-                    .set(
-                        this.data.clean.map(function(d) {
-                            return d[settings.color_col];
-                        })
-                    )
-                    .values()
+                this.data.levels
+                    .map(function(m) {
+                        return m.key;
+                    })
+                    .slice(0, 10)
             );
 
         this.radiusScale = d3.scale
@@ -252,6 +251,23 @@
             });
         });
         return nested;
+    }
+
+    function makeLevelData() {
+        var _this = this;
+
+        return d3
+            .nest()
+            .key(function(d) {
+                return d[_this.config.color_col];
+            })
+            .rollup(function(d) {
+                return d.length;
+            })
+            .entries(this.data.clean)
+            .sort(function(a, b) {
+                return b.values > a.values ? 1 : b.values < a.values ? -1 : 0;
+            });
     }
 
     function checkCols() {
@@ -978,23 +994,22 @@
         var chart = this.parent;
         var settings = this.parent.config;
 
-        filters.list.options = d3
-            .set(
-                chart.data.clean.map(function(m) {
-                    return m[filters.list.var];
-                })
-            )
-            .values();
+        //  filters.list.options = d3.set(chart.data.clean.map(m => m[filters.list.var])).values();
         if (filters.list.ul) filters.list.ul.remove();
         filters.list.ul = filters.list.wrap.append('ul');
         filters.list.lis = filters.list.ul
             .selectAll('li')
-            .data(filters.list.options)
+            .data(chart.data.levels)
             .enter()
             .append('li')
             .append('a')
             .text(function(d) {
-                return d;
+                return d.key + ' (' + d.values + ')';
+            })
+            .style('color', function(d) {
+                return chart.colorScale.domain().indexOf(d.key) > -1
+                    ? chart.colorScale(d.key)
+                    : '#999';
             });
 
         filters.list.lis.on('click', function(d) {
@@ -1024,7 +1039,16 @@
             });
 
         filters.list.varSelect.on('change', function(d) {
-            filters.list.var = this.value;
+            settings.color_col = this.value;
+            chart.data.levels = chart.makeLevelData();
+            chart.colorScale.domain(
+                chart.data.levels
+                    .map(function(m) {
+                        return m.key;
+                    })
+                    .slice(0, 10)
+            );
+
             controls.makeList();
         });
     }
@@ -1090,6 +1114,7 @@
             layout: layout,
             makeCleanData: makeCleanData,
             makeNestedData: makeNestedData,
+            makeLevelData: makeLevelData,
             checkCols: checkCols,
             plots: plots,
             tables: tables,

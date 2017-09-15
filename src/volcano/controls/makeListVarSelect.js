@@ -15,7 +15,10 @@ export function makeListVarSelect() {
         .text(d => d.value_col);
 
     filters.list.varSelect.on('change', function(d) {
-        filters.list.var = this.value;
+        settings.color_col = this.value;
+        chart.data.levels = chart.makeLevelData();
+        chart.colorScale.domain(chart.data.levels.map(m => m.key).slice(0, 10));
+
         controls.makeList();
     });
 }

@@ -14,6 +14,7 @@ export function init(data) {
     this.layout();
 
     this.data.clean = this.makeCleanData();
+    this.data.levels = this.makeLevelData();
     this.makeScales();
     this.data.nested = this.makeNestedData();
 
