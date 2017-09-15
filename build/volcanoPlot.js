@@ -27,8 +27,16 @@
         }
     };
 
+    function objectify(col) {
+        if (typeof col === 'string') {
+            return { value_col: col, label: col };
+        } else {
+            return col;
+        }
+    }
+
     function setDefaults(settings) {
-        settings.id_col = settings.id_col ? settings.id_col : defaultSettings.id_col;
+        settings.id_col = objectify(settings.id_col ? settings.id_col : defaultSettings.id_col);
         settings.p_col = settings.p_col ? settings.p_col : defaultSettings.p_col;
         settings.ratio_col = settings.ratio_col ? settings.ratio_col : defaultSettings.ratio_col;
         settings.height = settings.height ? settings.height : defaultSettings.height;
@@ -36,11 +44,20 @@
         settings.margin = settings.margin ? settings.margin : defaultSettings.margin;
         settings.showYaxis = settings.showYaxis ? settings.showYaxis : defaultSettings.showYaxis;
         settings.structure_cols = settings.structure_cols ? settings.structure_cols : [];
+        settings.structure_cols = settings.structure_cols.map(function(m) {
+            return objectify(m);
+        });
+
+        settings.detail_cols = settings.detail_cols ? settings.detail_cols : [];
+        settings.detail_cols = settings.detail_cols.map(function(m) {
+            return objectify(m);
+        });
         settings.color_col = settings.color_col
             ? settings.color_col
             : settings.structure_cols.length >= 1
-              ? settings.structure_cols[0].value_col || settings.structure_cols[0]
+              ? settings.structure_cols[0].value_col
               : defaultSettings.color_col;
+
         settings.ratioLimit = settings.ratioLimit
             ? settings.ratioLimit
             : defaultSettings.ratioLimit;
@@ -51,6 +68,7 @@
         settings.hexbin.countRange = settings.hexbin.countRange
             ? settings.hexbin.countRange
             : defaultSettings.hexbin.countRange;
+        console.log(settings);
 
         return settings;
     }
@@ -60,12 +78,14 @@
             .select(this.element)
             .append('div')
             .attr('class', 'ig-volcano');
-
-        this.config = setDefaults(this.config);
-        this.layout();
-
         this.data = {};
         this.data.raw = data;
+
+        this.config = setDefaults(this.config);
+        this.checkCols();
+
+        this.layout();
+
         this.data.clean = this.makeCleanData();
         this.makeScales();
         this.data.nested = this.makeNestedData();
@@ -144,17 +164,32 @@
         var data = this.data.raw;
         var settings = this.config;
 
-        var clean = data.map(function(d) {
-            d.plotName = d[settings.comparison_col] + ' vs. ' + d[settings.reference_col];
-            d[settings.p_col] = +d[settings.p_col];
-            d[settings.ratio_col] = +d[settings.ratio_col];
-            if (d[settings.ratio_col] > settings.ratioLimit) {
-                d.origRatio = d[settings.ratio_col];
-                d[settings.ratio_col] = +settings.ratioLimit;
-                d.aboveLimit = true;
-            }
-            return d;
-        });
+        var clean = data
+            .map(function(d) {
+                d.plotName = d[settings.comparison_col] + ' vs. ' + d[settings.reference_col];
+                d[settings.p_col] = d[settings.p_col] == '' ? NaN : +d[settings.p_col];
+                d[settings.ratio_col] = d[settings.ratio_col] == '' ? NaN : +d[settings.ratio_col];
+                if (d[settings.ratio_col] > settings.ratioLimit) {
+                    d.origRatio = d[settings.ratio_col];
+                    d[settings.ratio_col] = +settings.ratioLimit;
+                    d.aboveLimit = true;
+                }
+                return d;
+            })
+            .filter(function(d) {
+                return d[settings.p_col] || d[settings.p_col] === 0;
+            })
+            .filter(function(d) {
+                return d[settings.ratio_col] || d[settings.ratio_col] === 0;
+            });
+
+        if (clean.length < data.length) {
+            var diff = data.length - clean.length;
+            console.warn(
+                diff +
+                    ' rows removed because of missing or invalid data for ratio and/or p-values. Numeric values are required. Did you have p<0.05 or something similar?'
+            );
+        }
 
         return clean;
     }
@@ -167,7 +202,7 @@
         if (ids) {
             var idset = new Set(ids);
             data = data.filter(function(d) {
-                return idset.has(d[settings.id_col]);
+                return idset.has(d[settings.id_col.value_col]);
             });
         }
 
@@ -210,6 +245,43 @@
             });
         });
         return nested;
+    }
+
+    function checkCols() {
+        function objectify(col) {
+            if (typeof col === 'string') {
+                return { value_col: col, label: col };
+            } else {
+                return col;
+            }
+        }
+        var colNames = Object.keys(this.data.raw[0]);
+        var settings = this.config;
+        var settingObjs = d3
+            .merge([
+                [
+                    settings.id_col,
+                    settings.p_col,
+                    settings.ratio_col,
+                    settings.reference_col,
+                    settings.comparison_col,
+                    settings.color_col
+                ],
+                settings.structure_cols,
+                settings.detail_cols
+            ])
+            .map(function(m) {
+                return objectify(m);
+            });
+        settingObjs.forEach(function(col) {
+            if (colNames.indexOf(col.value_col) == -1) {
+                console.warn(
+                    "'" +
+                        col.value_col +
+                        "' column not found in the submitted data. Errors are likely."
+                );
+            }
+        });
     }
 
     function layout() {
@@ -562,7 +634,7 @@
         var current_hexes = current.selectAll('path.selected').data();
         var current_hexes = d3.merge(current_hexes);
         var currentIDs = d3.merge([current_points, current_hexes]).map(function(d) {
-            return d[settings.id_col];
+            return d[settings.id_col.value_col];
         });
 
         //prep hex overlay data
@@ -629,21 +701,21 @@
         this.selected.variables = d3.merge([
             [
                 {
-                    value_col: settings.id_col.value_col || settings.id_col,
-                    label: settings.id_col.label || settings.id_col.value_col || settings.id_col
+                    value_col: settings.id_col.value_col,
+                    label: settings.id_col.label
                 }
             ],
             settings.structure_cols.map(function(structure_col) {
                 return {
-                    value_col: structure_col.value_col || structure_col,
-                    label: structure_col.label || structure_col.value_col || structure_col
+                    value_col: structure_col.value_col,
+                    label: structure_col.label
                 };
             }),
             settings.detail_cols
                 ? settings.detail_cols.map(function(detail_col) {
                       return {
-                          value_col: detail_col.value_col || detail_col,
-                          label: detail_col.label || detail_col.value_col || detail_col
+                          value_col: detail_col.value_col,
+                          label: detail_col.label
                       };
                   })
                 : []
@@ -868,10 +940,7 @@
         if (datum) {
             this.details.data.info = datum;
             this.details.data.stats = this.parent.data.clean.filter(function(d) {
-                return (
-                    d[settings.id_col.value_col || settings.id_col] ==
-                    datum[settings.id_col.value_col || settings.id_col]
-                );
+                return d[settings.id_col.value_col] == datum[settings.id_col.value_col];
             });
             var infoHeader = this.details.table
                     .select('tbody')
@@ -956,6 +1025,7 @@
             layout: layout,
             makeCleanData: makeCleanData,
             makeNestedData: makeNestedData,
+            checkCols: checkCols,
             plots: plots,
             tables: tables
         };

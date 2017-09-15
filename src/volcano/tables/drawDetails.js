@@ -6,10 +6,7 @@ export default function drawDetails(datum) {
     if (datum) {
         this.details.data.info = datum;
         this.details.data.stats = this.parent.data.clean.filter(function(d) {
-            return (
-                d[settings.id_col.value_col || settings.id_col] ==
-                datum[settings.id_col.value_col || settings.id_col]
-            );
+            return d[settings.id_col.value_col] == datum[settings.id_col.value_col];
         });
         const infoHeader = this.details.table
                 .select('tbody')
