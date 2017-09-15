@@ -1,6 +1,7 @@
 import highlightCircles from '../../plots/drawHexes/highlightCircles';
 
 export default function onMouseOver(row, d) {
+    this.selected.table.selectAll('tbody tr').classed('highlighted', false);
     d3.select(row).classed('highlighted', true);
     this.drawDetails(d);
 

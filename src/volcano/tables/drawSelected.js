@@ -24,11 +24,9 @@ export default function drawSelected(data) {
             .append('tr')
             .classed('selected', true)
             .on('mouseover', function(d) {
-                rows.classed('highlighted', false);
                 onMouseOver.call(tables, this, d);
             })
             .on('click', function(d) {
-                rows.classed('clicked', false);
                 onClick.call(tables, this, d);
             });
 
