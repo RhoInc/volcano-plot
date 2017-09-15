@@ -131,6 +131,10 @@ class DatasetModel extends BaseModel {
         return;
       }
 
+      // first upload may not have a base folder //
+      if (!fs.existsSync(config.get('data.path')))
+        fs.mkdirSync(config.get('data.path'));
+
       let targetDir = path.join(config.get('data.path'), dirname.toString());
       if (!fs.existsSync(targetDir))
         fs.mkdirSync(targetDir);

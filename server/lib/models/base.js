@@ -240,7 +240,6 @@ class BaseModel extends EventEmitter {
         return db(this.table)
         .insert(obj)
         .then( newid => {
-      log.debug(`saved ${newid}`);
           resolve(newid ? this.getById(db, newid) : null);
         });
       } else {
