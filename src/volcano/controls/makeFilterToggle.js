@@ -3,6 +3,7 @@ export function makeFilterToggle() {
     var chart = this.parent;
     var settings = this.parent.config;
 
+    this.filters.toggle.wrap.append('span').text('Filter Type: ');
     this.filters.toggle.options = this.filters.toggle.wrap
         .selectAll('li')
         .data(settings.filterTypes)
@@ -20,11 +21,9 @@ export function makeFilterToggle() {
             controls.filters.toggle.options.classed('active', false);
             d3.select(this).classed('active', true);
             if (d == 'List') {
-                console.log(controls);
                 controls.filters.tree.wrap.classed('hidden', true);
                 controls.filters.list.wrap.classed('hidden', false);
             } else if (d == 'Tree') {
-                console.log(controls.filters.tree.wrap);
                 controls.filters.tree.wrap.classed('hidden', false);
                 controls.filters.list.wrap.classed('hidden', true);
             }

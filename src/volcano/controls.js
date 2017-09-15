@@ -1,6 +1,7 @@
 import { init } from './controls/init';
 import { layout } from './controls/layout';
 import { makeList } from './controls/makeList';
+import { makeListVarSelect } from './controls/makeListVarSelect';
 import { makeTree } from './controls/makeTree';
 import { makeFilterToggle } from './controls/makeFilterToggle';
 
@@ -9,5 +10,6 @@ export var controls = {
     layout: layout,
     makeList: makeList,
     makeTree: makeTree,
-    makeFilterToggle: makeFilterToggle
+    makeFilterToggle: makeFilterToggle,
+    makeListVarSelect: makeListVarSelect
 };

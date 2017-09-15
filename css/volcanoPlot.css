@@ -5,6 +5,22 @@
 .ig-volcano .hidden {
     display: none !important;
 }
+
+/*------------------------------------------------------------------------------------------------\
+  Sidebar layout
+\------------------------------------------------------------------------------------------------*/
+
+    .ig-volcano .controls {
+      width:25%;
+      display:inline-block;
+      vertical-align:top;
+    }
+
+    .ig-volcano .main{
+      width:70%;
+      display:inline-block;
+      vertical-align:top;
+    }
 /*------------------------------------------------------------------------------------------------\
   Controls
 \------------------------------------------------------------------------------------------------*/
@@ -16,6 +32,25 @@
         margin-left: 5px;
     }
 
+    .ig-volcano div.controls .filter.toggle {
+        list-style:none;
+        padding:0;
+        margin:0;
+    }
+
+    .ig-volcano div.controls .filter.toggle li {
+        display:inline-block;
+        padding-left:1em;
+        cursor:pointer;
+    }
+
+    .ig-volcano div.controls .filter.toggle li a.active {
+        font-weight: bold;
+    }
+
+    .ig-volcano div.controls .filter.list ul{
+      list-style:none;
+    }
 /*------------------------------------------------------------------------------------------------\
   Plots
 \------------------------------------------------------------------------------------------------*/
@@ -32,13 +67,6 @@
         shape-rendering: crispEdges;
     }
 
-    /* button formatting */
-    div.controls ul {
-        list-style:none;
-    }
-    div.controls ul li {
-        display:inline-block;
-    }
 
     /* brush formatting */
     g.brush rect.extent {

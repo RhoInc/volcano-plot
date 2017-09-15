@@ -293,8 +293,9 @@
 
     function layout() {
         this.controls.wrap = this.wrap.append('div').attr('class', 'controls');
-        this.plots.wrap = this.wrap.append('div').attr('class', 'charts');
-        this.tables.wrap = this.wrap.append('div').attr('class', 'tables');
+        var main = this.wrap.append('div').attr('class', 'main');
+        this.plots.wrap = main.append('div').attr('class', 'charts');
+        this.tables.wrap = main.append('div').attr('class', 'tables');
     }
 
     function init$1() {
@@ -586,12 +587,18 @@
         end: end
     };
 
+    function update$1() {
+        //this.drawHexes();
+        //this.brush.init();
+    }
+
     var plots = {
         init: init$1,
         layout: layout$1,
         drawAxis: drawAxis,
         drawHexes: drawHexes,
-        brush: brush
+        brush: brush,
+        update: update$1
     };
 
     function init$3() {
@@ -929,7 +936,7 @@
             this.filters.parent = this;
             this.filters.current = settings.filterTypes[0];
             this.filters.toggle = {};
-            this.filters.toggle.wrap = this.wrap.append('div').attr('class', 'filter toggle');
+            this.filters.toggle.wrap = this.wrap.append('ul').attr('class', 'filter toggle');
             this.filters.tree = {};
             this.filters.tree.wrap = this.wrap.append('div').attr('class', 'filter tree');
 
@@ -942,12 +949,16 @@
             }
 
             if (settings.filterTypes.indexOf('List') > -1) {
+                this.filters.list.wrap.append('h5').text("List o' Filters");
+                this.filters.list.var = settings.structure_cols[0].value_col;
+                this.makeListVarSelect();
                 this.makeList();
                 this.filters.list.wrap.classed('hidden', this.filters.current != 'List');
             }
 
             if (settings.filterTypes.indexOf('Tree') > -1) {
                 this.makeTree();
+                this.filters.tree.wrap.append('h5').text("Tree o' Filters");
                 this.filters.tree.wrap.classed('hidden', this.filters.current != 'Tree');
             }
 
@@ -964,13 +975,63 @@
     function makeList() {
         var controls = this;
         var filters = this.filters;
-        filters.list.wrap.append('span').text("List o' Filters");
+        var chart = this.parent;
+        var settings = this.parent.config;
+
+        filters.list.options = d3
+            .set(
+                chart.data.clean.map(function(m) {
+                    return m[filters.list.var];
+                })
+            )
+            .values();
+        if (filters.list.ul) filters.list.ul.remove();
+        filters.list.ul = filters.list.wrap.append('ul');
+        filters.list.lis = filters.list.ul
+            .selectAll('li')
+            .data(filters.list.options)
+            .enter()
+            .append('li')
+            .append('a')
+            .text(function(d) {
+                return d;
+            });
+
+        filters.list.lis.on('click', function(d) {
+            chart.data.filtered = chart.data.clean.filter(function(f) {
+                return f[filters.list.var] == d;
+            });
+            chart.plot.update();
+        });
+    }
+
+    function makeListVarSelect() {
+        var controls = this;
+        var filters = this.filters;
+        var chart = this.parent;
+        var settings = this.parent.config;
+
+        //Select the variable for filters
+        filters.list.wrap.append('span').text('Filter Variable: ');
+        filters.list.varSelect = filters.list.wrap.append('select');
+        filters.list.varSelectOptions = filters.list.varSelect
+            .selectAll('option')
+            .data(settings.structure_cols)
+            .enter()
+            .append('option')
+            .text(function(d) {
+                return d.value_col;
+            });
+
+        filters.list.varSelect.on('change', function(d) {
+            filters.list.var = this.value;
+            controls.makeList();
+        });
     }
 
     function makeTree() {
         var controls = this;
         var filters = this.filters;
-        filters.tree.wrap.append('span').text("Tree o' Filters");
     }
 
     function makeFilterToggle() {
@@ -978,6 +1039,7 @@
         var chart = this.parent;
         var settings = this.parent.config;
 
+        this.filters.toggle.wrap.append('span').text('Filter Type: ');
         this.filters.toggle.options = this.filters.toggle.wrap
             .selectAll('li')
             .data(settings.filterTypes)
@@ -997,11 +1059,9 @@
                 controls.filters.toggle.options.classed('active', false);
                 d3.select(this).classed('active', true);
                 if (d == 'List') {
-                    console.log(controls);
                     controls.filters.tree.wrap.classed('hidden', true);
                     controls.filters.list.wrap.classed('hidden', false);
                 } else if (d == 'Tree') {
-                    console.log(controls.filters.tree.wrap);
                     controls.filters.tree.wrap.classed('hidden', false);
                     controls.filters.list.wrap.classed('hidden', true);
                 }
@@ -1014,7 +1074,8 @@
         layout: layout$3,
         makeList: makeList,
         makeTree: makeTree,
-        makeFilterToggle: makeFilterToggle
+        makeFilterToggle: makeFilterToggle,
+        makeListVarSelect: makeListVarSelect
     };
 
     function createVolcano() {

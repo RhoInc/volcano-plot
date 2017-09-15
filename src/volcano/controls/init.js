@@ -10,7 +10,7 @@ export function init() {
         this.filters.parent = this;
         this.filters.current = settings.filterTypes[0];
         this.filters.toggle = {};
-        this.filters.toggle.wrap = this.wrap.append('div').attr('class', 'filter toggle');
+        this.filters.toggle.wrap = this.wrap.append('ul').attr('class', 'filter toggle');
         this.filters.tree = {};
         this.filters.tree.wrap = this.wrap.append('div').attr('class', 'filter tree');
 
@@ -23,12 +23,16 @@ export function init() {
         }
 
         if (settings.filterTypes.indexOf('List') > -1) {
+            this.filters.list.wrap.append('h5').text("List o' Filters");
+            this.filters.list.var = settings.structure_cols[0].value_col;
+            this.makeListVarSelect();
             this.makeList();
             this.filters.list.wrap.classed('hidden', this.filters.current != 'List');
         }
 
         if (settings.filterTypes.indexOf('Tree') > -1) {
             this.makeTree();
+            this.filters.tree.wrap.append('h5').text("Tree o' Filters");
             this.filters.tree.wrap.classed('hidden', this.filters.current != 'Tree');
         }
 
