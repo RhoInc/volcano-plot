@@ -8,7 +8,13 @@
     "bundle": "rollup -c",
     "format": "prettier --single-quote --tab-width=4 --print-width=100 --write \"./src/**/*.js\"",
     "format-build": "prettier --single-quote --tab-width=4 --print-width=100 --write ./build/volcanoPlot.js",
-    "watch": "rollup -c -w"
+    "watch": "rollup -c -w",
+    "build-server": "npm run build && npm run restart-server",
+    "restart-server": "cd server && cross-env NODE_ENV=devlocal node server",
+    "rebuild-db": "npm run migrate-db && npm run seed-db",
+    "migrate-db": "npm run cross-env NODE_ENV=devlocal knex migrate:latest -- --knexfile ./db/config.js ",
+    "seed-db": "npm run cross-env NODE_ENV=devlocal knex seed:run -- --knexfile ./db/config.js",
+    "cross-env": "cross-env"
   },
   "repository": {
     "type": "git",
@@ -24,13 +30,30 @@
   },
   "homepage": "https://github.com/RhoInc/volcano-plot#readme",
   "dependencies": {
-      "d3": "~3",
-      "webcharts": "~1"
+    "compression": "~1",
+    "config": "~1",
+    "connect-favicons": "^0.1.5",
+    "cross-env": "~1",
+    "csvtojson": "^1.1.4",
+    "d3": "~3",
+    "duration": "^0.2.0",
+    "express": "~4",
+    "express-busboy": "~5",
+    "express-session": "~1",
+    "fs-extra": "^4.0.2",
+    "knex": "^0.13.0",
+    "line-by-line": "^0.1.5",
+    "sqlite3": "^3.1.9",
+    "stream-array": "^1.1.2",
+    "uuid": "^3.1.0",
+    "webcharts": "~1",
+    "winston": "~2",
+    "winston-daily-rotate-file": "~1"
   },
   "devDependencies": {
     "babel-cli": "^6.0.0",
     "babel-preset-es2015-rollup": "^1.1.1",
-    "prettier":"~1",
+    "prettier": "~1",
     "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.4.0",
     "rollup-watch": "~3.2.2"
