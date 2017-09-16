@@ -68,7 +68,6 @@
         settings.hexbin.countRange = settings.hexbin.countRange
             ? settings.hexbin.countRange
             : defaultSettings.hexbin.countRange;
-        console.log(settings);
 
         return settings;
     }
@@ -380,58 +379,155 @@
         });
     }
 
+    function highlightCircles() {
+        var chart = this;
+
+        this.wrap.selectAll('circle.highlighted').remove();
+
+        this.plots.svgs.each(function(d) {
+            var svg = d3.select(this);
+
+            d.highlighted.forEach(function(di) {
+                svg
+                    .append('circle')
+                    .classed('highlighted', true)
+                    .attr({
+                        cx: chart.x(+di.fc),
+                        cy: chart.y(+di.post),
+                        r: 3,
+                        fill: 'white',
+                        stroke: 'red',
+                        'stroke-width': '1.5px'
+                    });
+            });
+        });
+    }
+
+    function onMouseMove(svg, d) {
+        var _this = this;
+
+        var mouse = d3.mouse(svg),
+            coordinates = d.coordinates.concat(d.overlayCoordinates),
+            nearby = coordinates.filter(function(d) {
+                //if ((d.x - 5) <= mouse[0] && mouse[0] <= (d.x + 5) &&
+                //    (d.y - 5) <= mouse[1] && mouse[1] <= (d.y + 5)) {
+
+                //    console.log(d);
+                //    console.log(
+                //        (d.x - 5), mouse[0], (d.x + 5)
+                //    );
+                //    console.log(
+                //        (d.y - 5), mouse[1], (d.y + 5)
+                //    );
+                //}
+                d.distance = Math.sqrt(Math.pow(d.x - mouse[0], 2) + Math.pow(d.y - mouse[1], 2));
+                return (
+                    d.x - 10 <= mouse[0] &&
+                    mouse[0] <= d.x + 10 &&
+                    d.y - 10 <= mouse[1] &&
+                    mouse[1] <= d.y + 10
+                );
+            });
+
+        if (nearby.length) {
+            var closest = d3.min(nearby, function(d) {
+                    return d.distance;
+                }),
+                datum = nearby.filter(function(d) {
+                    return d.distance === closest;
+                })[0];
+            this.data.highlighted = this.data.clean.filter(function(d) {
+                return datum.id === d[_this.config.id_col.value_col];
+            });
+            this.plots.svgs.each(function(d) {
+                return (d.highlighted = _this.data.highlighted.filter(function(di) {
+                    return di.plotName === d.key;
+                }));
+            });
+            this.tables.drawDetails(this.data.highlighted.pop());
+            highlightCircles.call(this);
+        }
+    }
+
     function drawHexes() {
         var overlay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
         var chart = this.parent;
         var settings = this.parent.config;
-        chart.plots.svgs.each(function(d) {
-            //draw the main hexes/circles
-            var pointGroups = d3
-                .select(this)
-                .selectAll('g.hexGroups')
-                .data(overlay ? d.overlay : d.hexData)
-                .enter()
-                .append('g')
-                .attr('class', 'hexGroup')
-                .classed('overlay', overlay);
+        chart.plots.svgs
+            .each(function(d) {
+                d.overlayCoordinates = [];
+                if (!overlay) d.coordinates = [];
 
-            pointGroups.each(function(d) {
-                if (d.drawCircles) {
-                    d3
-                        .select(this)
-                        .selectAll('circle')
-                        .data(d)
-                        .enter()
-                        .append('circle')
-                        .attr('class', 'point')
-                        .attr('cx', function(d) {
-                            return chart.x(d[settings.ratio_col]);
-                        })
-                        .attr('cy', function(d) {
-                            return chart.y(d[settings.p_col]);
-                        })
-                        .attr('r', 2)
-                        .attr('fill', function(d) {
-                            return overlay ? 'white' : chart.colorScale(d[settings.color_col]);
-                        });
-                } else {
-                    d3
-                        .select(this)
-                        .append('path')
-                        .attr('class', 'hex')
-                        .attr('d', function(d) {
-                            return chart.hexbin.hexagon(chart.radiusScale(d.size));
-                        })
-                        .attr('transform', function(d) {
-                            return 'translate(' + d.x + ',' + d.y + ')';
-                        })
-                        .attr('fill', function(d) {
-                            return overlay ? 'white' : d.color;
-                        });
-                }
+                //draw the main hexes/circles
+                var pointGroups = d3
+                    .select(this)
+                    .selectAll('g.hexGroups')
+                    .data(overlay ? d.overlay : d.hexData)
+                    .enter()
+                    .append('g')
+                    .attr('class', 'hexGroup')
+                    .classed('overlay', overlay);
+
+                pointGroups.each(function(di) {
+                    var mark = void 0;
+                    if (di.drawCircles) {
+                        mark = d3
+                            .select(this)
+                            .selectAll('circle')
+                            .data(di)
+                            .enter()
+                            .append('circle')
+                            .attr('class', 'point')
+                            .attr('cx', function(dii) {
+                                return chart.x(dii[settings.ratio_col]);
+                            })
+                            .attr('cy', function(dii) {
+                                return chart.y(dii[settings.p_col]);
+                            })
+                            .attr('r', 2)
+                            .attr('fill', function(dii) {
+                                return overlay
+                                    ? 'white'
+                                    : chart.colorScale(dii[settings.color_col]);
+                            });
+
+                        if (!overlay)
+                            di.forEach(function(dii) {
+                                d.coordinates.push({
+                                    id: dii[settings.id_col.value_col],
+                                    x: di.x,
+                                    y: di.y
+                                });
+                            });
+                        else
+                            di.forEach(function(dii) {
+                                d.overlayCoordinates.push({
+                                    id: dii[settings.id_col.value_col],
+                                    x: di.x,
+                                    y: di.y
+                                });
+                            });
+                    } else {
+                        mark = d3
+                            .select(this)
+                            .append('path')
+                            .attr('class', 'hex')
+                            .attr('d', function(dii) {
+                                return chart.hexbin.hexagon(chart.radiusScale(dii.size));
+                            })
+                            .attr('transform', function(dii) {
+                                return 'translate(' + dii.x + ',' + dii.y + ')';
+                            })
+                            .attr('fill', function(dii) {
+                                return overlay ? 'white' : dii.color;
+                            });
+                    }
+                });
+            })
+            .on('mousemove', function(d) {
+                onMouseMove.call(chart, this, d);
             });
-        });
     }
 
     function init$2() {
@@ -490,6 +586,8 @@
             .selectAll('path.hex')
             .attr('fill-opacity', 1)
             .classed('selected', false);
+
+        var highlights = chart.plots.svgs.selectAll('circle.highlighted').remove();
     }
 
     function update(chart) {
