@@ -33,15 +33,21 @@ export function end(chart) {
             }
         });
     } else {
+        chart.wrap.classed('brushed', false);
         chart.data.nested.forEach(function(d) {
             d.overlay = [];
-            chart.wrap.classed('brushed', false);
         });
 
         //Clear tables.
         chart.tables.drawSelected.multiplier = 1;
         chart.tables.drawSelected([]);
         chart.tables.drawDetails();
+
+        chart.wrap
+            .selectAll('g.brush')
+            .select('rect.extent')
+            .attr('height', 0)
+            .attr('width', 0);
     }
 
     //draw hex overlays

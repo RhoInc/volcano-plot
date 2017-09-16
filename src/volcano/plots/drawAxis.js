@@ -33,7 +33,7 @@ export function drawAxis() {
                 .attr('fill', '#999')
                 .style('text-anchor', 'end')
                 .text('p-value');
-
+            /*
             yAxisWrap
                 .append('text')
                 .attr('class', 'label')
@@ -44,6 +44,7 @@ export function drawAxis() {
                 .attr('fill', '#999')
                 .style('text-anchor', 'end')
                 .text('(Click to change quadrants)');
+        */
         }
     });
 }

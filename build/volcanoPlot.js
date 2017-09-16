@@ -24,7 +24,8 @@
         hexbin: {
             radius: { min: 3, max: 10 },
             countRange: { min: 3, max: 100 }
-        }
+        },
+        filterTypes: ['List', 'Tree']
     };
 
     function objectify(col) {
@@ -68,7 +69,10 @@
         settings.hexbin.countRange = settings.hexbin.countRange
             ? settings.hexbin.countRange
             : defaultSettings.hexbin.countRange;
-        console.log(settings);
+
+        settings.filterTypes = settings.filterTypes
+            ? settings.filterTypes
+            : defaultSettings.filterTypes;
 
         return settings;
     }
@@ -87,8 +91,13 @@
         this.layout();
 
         this.data.clean = this.makeCleanData();
+        this.data.levels = this.makeLevelData();
+        this.data.filtered = this.data.clean; //no filters on initial render;
         this.makeScales();
         this.data.nested = this.makeNestedData();
+
+        this.controls.parent = this;
+        this.controls.init();
 
         this.plots.parent = this;
         this.plots.init();
@@ -134,13 +143,11 @@
             .ordinal()
             .range(d3.scale.category10().range())
             .domain(
-                d3
-                    .set(
-                        this.data.clean.map(function(d) {
-                            return d[settings.color_col];
-                        })
-                    )
-                    .values()
+                this.data.levels
+                    .map(function(m) {
+                        return m.key;
+                    })
+                    .slice(0, 10)
             );
 
         this.radiusScale = d3.scale
@@ -197,7 +204,7 @@
     function makeNestedData(ids) {
         //convenience mappings
         var chart = this;
-        var data = this.data.clean;
+        var data = this.data.filtered;
         var settings = this.config;
         if (ids) {
             var idset = new Set(ids);
@@ -241,10 +248,51 @@
                 e.levels.sort(function(a, b) {
                     return b.values - a.values;
                 });
-                e.color = chart.colorScale(e.levels[0].key);
+                e.color =
+                    chart.colorScale.domain().indexOf(e.levels[0].key) > -1
+                        ? chart.colorScale(e.levels[0].key)
+                        : '#999';
             });
         });
         return nested;
+    }
+
+    function makeLevelData() {
+        var _this = this;
+
+        return d3
+            .nest()
+            .key(function(d) {
+                return d[_this.config.color_col];
+            })
+            .rollup(function(d) {
+                return d.length;
+            })
+            .entries(this.data.clean)
+            .sort(function(a, b) {
+                return b.values > a.values ? 1 : b.values < a.values ? -1 : 0;
+            })
+            .map(function(d) {
+                d.selected = true;
+                return d;
+            });
+    }
+
+    function makeFilteredData() {
+        var settings = this.config;
+        var levelSet = new Set(
+            this.data.levels
+                .filter(function(f) {
+                    return f.selected;
+                })
+                .map(function(m) {
+                    return m.key;
+                })
+        );
+        var filtered = this.data.clean.filter(function(d) {
+            return levelSet.has(d[settings.color_col]);
+        });
+        return filtered;
     }
 
     function checkCols() {
@@ -285,12 +333,10 @@
     }
 
     function layout() {
-        this.wrap.append('div').attr('class', 'top');
-        this.wrap.append('div').attr('class', 'middle');
-        var bottom = this.wrap.append('div').attr('class', 'bottom');
-        bottom.append('div').attr('class', 'info third');
-        bottom.append('div').attr('class', 'summarytable third');
-        bottom.append('div').attr('class', 'details third');
+        this.controls.wrap = this.wrap.append('div').attr('class', 'controls');
+        var main = this.wrap.append('div').attr('class', 'main');
+        this.plots.wrap = main.append('div').attr('class', 'charts');
+        this.tables.wrap = main.append('div').attr('class', 'tables');
     }
 
     function init$1() {
@@ -305,8 +351,7 @@
         var chart = this.parent;
         var settings = this.parent.config;
 
-        chart.plots.svgs = chart.wrap
-            .select('div.middle')
+        chart.plots.svgs = chart.plots.wrap
             .selectAll('div.volcanoPlot')
             .data(chart.data.nested, function(d) {
                 return d.key;
@@ -365,17 +410,18 @@
                     .attr('fill', '#999')
                     .style('text-anchor', 'end')
                     .text('p-value');
-
-                yAxisWrap
-                    .append('text')
-                    .attr('class', 'label')
-                    .attr('transform', 'rotate(-90)')
-                    .attr('y', 6)
-                    .attr('dy', '-53px')
-                    .attr('font-size', '10')
-                    .attr('fill', '#999')
-                    .style('text-anchor', 'end')
-                    .text('(Click to change quadrants)');
+                /*
+            yAxisWrap
+                .append('text')
+                .attr('class', 'label')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 6)
+                .attr('dy', '-53px')
+                .attr('font-size', '10')
+                .attr('fill', '#999')
+                .style('text-anchor', 'end')
+                .text('(Click to change quadrants)');
+            */
             }
         });
     }
@@ -413,7 +459,11 @@
                         })
                         .attr('r', 2)
                         .attr('fill', function(d) {
-                            return overlay ? 'white' : chart.colorScale(d[settings.color_col]);
+                            return overlay
+                                ? 'white'
+                                : chart.colorScale.domain().indexOf(d[settings.color_col]) > -1
+                                  ? chart.colorScale(d[settings.color_col])
+                                  : '#999';
                         });
                 } else {
                     d3
@@ -559,15 +609,21 @@
                 }
             });
         } else {
+            chart.wrap.classed('brushed', false);
             chart.data.nested.forEach(function(d) {
                 d.overlay = [];
-                chart.wrap.classed('brushed', false);
             });
 
             //Clear tables.
             chart.tables.drawSelected.multiplier = 1;
             chart.tables.drawSelected([]);
             chart.tables.drawDetails();
+
+            chart.wrap
+                .selectAll('g.brush')
+                .select('rect.extent')
+                .attr('height', 0)
+                .attr('width', 0);
         }
 
         //draw hex overlays
@@ -583,12 +639,35 @@
         end: end
     };
 
+    function update$1() {
+        //clear stuff
+        var chart = this.parent;
+        var settings = this.parent.config;
+        chart.plots.wrap.selectAll('g.hexGroup').remove();
+        chart.tables.drawSelected.multiplier = 1;
+        chart.tables.drawSelected([]);
+        chart.tables.drawDetails();
+        chart.wrap.classed('brushed', false);
+        chart.wrap
+            .selectAll('g.brush')
+            .select('rect.extent')
+            .attr('height', 0)
+            .attr('width', 0);
+
+        //bind the new data
+        chart.plots.svgs.data(chart.data.nested, function(d) {
+            return d.key;
+        });
+        this.drawHexes();
+    }
+
     var plots = {
         init: init$1,
         layout: layout$1,
         drawAxis: drawAxis,
         drawHexes: drawHexes,
-        brush: brush
+        brush: brush,
+        update: update$1
     };
 
     function init$3() {
@@ -691,7 +770,7 @@
     \-------------------------------------------------------------------------------------------**/
 
         //Header
-        this.selected.wrap = this.parent.wrap
+        this.selected.wrap = this.parent.tables.wrap
             .append('div')
             .classed('table', true)
             .attr('id', 'selected-table');
@@ -756,7 +835,7 @@
     \-------------------------------------------------------------------------------------------**/
 
         //Header
-        this.details.wrap = this.parent.wrap
+        this.details.wrap = this.parent.tables.wrap
             .append('div')
             .classed('table', true)
             .attr('id', 'details-table');
@@ -914,6 +993,214 @@
         drawDetails: drawDetails
     };
 
+    function init$4() {
+        // make Header
+        var head = this.wrap.append('div').attr('class', 'head');
+        head.append('h3').text('Controls');
+        // make instructions
+        head
+            .append('small')
+            .text(
+                'Use selections below to filter the volcano plots. Click text to select a single level. Click Checkbox to toggle the level.'
+            );
+
+        //initialize the filters
+        if (settings.filterTypes) {
+            this.filters = {};
+            this.filters.parent = this;
+            this.filters.current = settings.filterTypes[0];
+            this.filters.toggle = {};
+            this.filters.toggle.wrap = this.wrap.append('ul').attr('class', 'filter toggle');
+            this.filters.tree = {};
+            this.filters.tree.wrap = this.wrap.append('div').attr('class', 'filter tree');
+
+            this.filters.list = {};
+            this.filters.list.wrap = this.wrap.append('div').attr('class', 'filter list');
+
+            //initialize the filters
+            if (settings.filterTypes.length > 1) {
+                this.makeFilterToggle();
+            }
+
+            if (settings.filterTypes.indexOf('List') > -1) {
+                this.filters.list.var = settings.structure_cols[0].value_col;
+                this.makeListVarSelect();
+                this.makeList();
+                this.filters.list.wrap.classed('hidden', this.filters.current != 'List');
+            }
+
+            if (settings.filterTypes.indexOf('Tree') > -1) {
+                this.makeTree();
+                this.filters.tree.wrap.classed('hidden', this.filters.current != 'Tree');
+            }
+
+            console.log(this);
+            //make FilterToggle (if needed)
+        } else {
+            //or hide the controls div if filters aren't provided
+            this.wrap.classed('hidden', true);
+        }
+    }
+
+    function layout$3() {}
+
+    function makeList() {
+        var controls = this;
+        var filters = this.filters;
+        var chart = this.parent;
+        var settings = this.parent.config;
+
+        //  filters.list.options = d3.set(chart.data.clean.map(m => m[filters.list.var])).values();
+        if (filters.list.ul) filters.list.ul.remove();
+        filters.list.ul = filters.list.wrap.append('ul');
+        filters.list.lis = filters.list.ul
+            .selectAll('li')
+            .data(chart.data.levels)
+            .enter()
+            .append('li')
+            .classed('active', function(d) {
+                return d.selected;
+            });
+
+        filters.list.inputs = filters.list.lis
+            .append('input')
+            .attr('type', 'checkbox')
+            .property('checked', true);
+        filters.list.links = filters.list.lis
+            .append('a')
+            .text(function(d) {
+                return d.key + ' (' + d.values + ')';
+            })
+            .style('color', function(d) {
+                return chart.colorScale.domain().indexOf(d.key) > -1
+                    ? chart.colorScale(d.key)
+                    : '#999';
+            });
+
+        //selected a single level
+        filters.list.links.on('click', function(d) {
+            var toggle = d3.select(this).property('checked');
+            var li = d3.select(this.parentNode);
+
+            //deselect all
+            filters.list.lis.each(function(d) {
+                d.selected = false;
+            });
+            filters.list.lis.classed('active', false);
+            filters.list.inputs.property('checked', false);
+
+            //select this one
+            d.selected = true;
+            li.classed('active', true);
+            li.select('input').property('checked', true);
+
+            chart.data.filtered = chart.makeFilteredData();
+            chart.data.nested = chart.makeNestedData();
+            chart.plots.update();
+        });
+
+        //toggle a single level
+
+        filters.list.inputs.on('click', function(d) {
+            var li = d3.select(this.parentNode);
+            var toggle = li.select('input').property('checked');
+
+            li.select('input').property('checked');
+            li.classed('active', toggle);
+            d.selected = toggle;
+
+            chart.data.filtered = chart.makeFilteredData();
+            chart.data.nested = chart.makeNestedData();
+            chart.plots.update();
+        });
+    }
+
+    function makeListVarSelect() {
+        var controls = this;
+        var filters = this.filters;
+        var chart = this.parent;
+        var settings = this.parent.config;
+
+        //Select the variable for filters
+        filters.list.wrap.append('span').text('Filter Variable: ');
+        filters.list.varSelect = filters.list.wrap.append('select');
+        filters.list.varSelectOptions = filters.list.varSelect
+            .selectAll('option')
+            .data(settings.structure_cols)
+            .enter()
+            .append('option')
+            .text(function(d) {
+                return d.value_col;
+            });
+
+        filters.list.varSelect.on('change', function(d) {
+            settings.color_col = this.value;
+            chart.data.levels = chart.makeLevelData();
+            chart.colorScale.domain(
+                chart.data.levels
+                    .map(function(m) {
+                        return m.key;
+                    })
+                    .slice(0, 10)
+            );
+            controls.makeList();
+
+            //update charts
+            chart.data.filtered = chart.data.clean;
+            chart.data.nested = chart.makeNestedData();
+            chart.plots.update();
+        });
+    }
+
+    function makeTree() {
+        var controls = this;
+        var filters = this.filters;
+    }
+
+    function makeFilterToggle() {
+        var controls = this;
+        var chart = this.parent;
+        var settings = this.parent.config;
+
+        this.filters.toggle.wrap.append('span').text('Filter Type: ');
+        this.filters.toggle.options = this.filters.toggle.wrap
+            .selectAll('li')
+            .data(settings.filterTypes)
+            .enter()
+            .append('li')
+            .append('a')
+            .text(function(d) {
+                return d;
+            })
+            .classed('active', function(d, i) {
+                return i == 0;
+            });
+        this.filters.toggle.options.on('click', function(d) {
+            var activeFlag = d3.select(this).classed('active');
+            if (!activeFlag) {
+                controls.filters.current = d;
+                controls.filters.toggle.options.classed('active', false);
+                d3.select(this).classed('active', true);
+                if (d == 'List') {
+                    controls.filters.tree.wrap.classed('hidden', true);
+                    controls.filters.list.wrap.classed('hidden', false);
+                } else if (d == 'Tree') {
+                    controls.filters.tree.wrap.classed('hidden', false);
+                    controls.filters.list.wrap.classed('hidden', true);
+                }
+            }
+        });
+    }
+
+    var controls = {
+        init: init$4,
+        layout: layout$3,
+        makeList: makeList,
+        makeTree: makeTree,
+        makeFilterToggle: makeFilterToggle,
+        makeListVarSelect: makeListVarSelect
+    };
+
     function createVolcano() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var config = arguments[1];
@@ -926,9 +1213,13 @@
             layout: layout,
             makeCleanData: makeCleanData,
             makeNestedData: makeNestedData,
+            makeLevelData: makeLevelData,
+            makeFilteredData: makeFilteredData,
+
             checkCols: checkCols,
             plots: plots,
-            tables: tables
+            tables: tables,
+            controls: controls
         };
 
         volcano.events = {

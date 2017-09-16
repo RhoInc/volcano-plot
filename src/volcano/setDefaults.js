@@ -35,7 +35,8 @@ export function setDefaults(settings) {
     settings.hexbin.countRange = settings.hexbin.countRange
         ? settings.hexbin.countRange
         : defaults.hexbin.countRange;
-    console.log(settings);
+
+    settings.filterTypes = settings.filterTypes ? settings.filterTypes : defaults.filterTypes;
 
     return settings;
 }

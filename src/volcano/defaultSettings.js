@@ -15,5 +15,6 @@ export const defaultSettings = {
     hexbin: {
         radius: { min: 3, max: 10 },
         countRange: { min: 3, max: 100 }
-    }
+    },
+    filterTypes: ['List', 'Tree']
 };

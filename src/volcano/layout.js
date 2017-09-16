@@ -1,8 +1,6 @@
 export function layout() {
-    this.wrap.append('div').attr('class', 'top');
-    this.wrap.append('div').attr('class', 'middle');
-    var bottom = this.wrap.append('div').attr('class', 'bottom');
-    bottom.append('div').attr('class', 'info third');
-    bottom.append('div').attr('class', 'summarytable third');
-    bottom.append('div').attr('class', 'details third');
+    this.controls.wrap = this.wrap.append('div').attr('class', 'controls');
+    var main = this.wrap.append('div').attr('class', 'main');
+    this.plots.wrap = main.append('div').attr('class', 'charts');
+    this.tables.wrap = main.append('div').attr('class', 'tables');
 }

@@ -26,7 +26,12 @@ export function drawHexes(overlay = false) {
                     .attr('r', 2)
                     .attr(
                         'fill',
-                        d => (overlay ? 'white' : chart.colorScale(d[settings.color_col]))
+                        d =>
+                            overlay
+                                ? 'white'
+                                : chart.colorScale.domain().indexOf(d[settings.color_col]) > -1
+                                  ? chart.colorScale(d[settings.color_col])
+                                  : '#999'
                     );
             } else {
                 d3

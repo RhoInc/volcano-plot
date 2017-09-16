@@ -2,8 +2,7 @@ export function layout() {
     var chart = this.parent;
     var settings = this.parent.config;
 
-    chart.plots.svgs = chart.wrap
-        .select('div.middle')
+    chart.plots.svgs = chart.plots.wrap
         .selectAll('div.volcanoPlot')
         .data(chart.data.nested, function(d) {
             return d.key;

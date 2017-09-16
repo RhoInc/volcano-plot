@@ -34,15 +34,7 @@ export function makeScales() {
     this.colorScale = d3.scale
         .ordinal()
         .range(d3.scale.category10().range())
-        .domain(
-            d3
-                .set(
-                    this.data.clean.map(function(d) {
-                        return d[settings.color_col];
-                    })
-                )
-                .values()
-        );
+        .domain(this.data.levels.map(m => m.key).slice(0, 10));
 
     this.radiusScale = d3.scale
         .sqrt()
