@@ -91,8 +91,8 @@
         this.layout();
 
         this.data.clean = this.makeCleanData();
-        this.data.filtered = this.data.clean; //no filters on initial render;
         this.data.levels = this.makeLevelData();
+        this.data.filtered = this.data.clean; //no filters on initial render;
         this.makeScales();
         this.data.nested = this.makeNestedData();
 
@@ -271,7 +271,28 @@
             .entries(this.data.clean)
             .sort(function(a, b) {
                 return b.values > a.values ? 1 : b.values < a.values ? -1 : 0;
+            })
+            .map(function(d) {
+                d.selected = true;
+                return d;
             });
+    }
+
+    function makeFilteredData() {
+        var settings = this.config;
+        var levelSet = new Set(
+            this.data.levels
+                .filter(function(f) {
+                    return f.selected;
+                })
+                .map(function(m) {
+                    return m.key;
+                })
+        );
+        var filtered = this.data.clean.filter(function(d) {
+            return levelSet.has(d[settings.color_col]);
+        });
+        return filtered;
     }
 
     function checkCols() {
@@ -389,17 +410,18 @@
                     .attr('fill', '#999')
                     .style('text-anchor', 'end')
                     .text('p-value');
-
-                yAxisWrap
-                    .append('text')
-                    .attr('class', 'label')
-                    .attr('transform', 'rotate(-90)')
-                    .attr('y', 6)
-                    .attr('dy', '-53px')
-                    .attr('font-size', '10')
-                    .attr('fill', '#999')
-                    .style('text-anchor', 'end')
-                    .text('(Click to change quadrants)');
+                /*
+            yAxisWrap
+                .append('text')
+                .attr('class', 'label')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 6)
+                .attr('dy', '-53px')
+                .attr('font-size', '10')
+                .attr('fill', '#999')
+                .style('text-anchor', 'end')
+                .text('(Click to change quadrants)');
+            */
             }
         });
     }
@@ -973,9 +995,14 @@
 
     function init$4() {
         // make Header
-        this.wrap.append('h3').text('Controls');
+        var head = this.wrap.append('div').attr('class', 'head');
+        head.append('h3').text('Controls');
         // make instructions
-        this.wrap.append('span').text('Use selections below to filter the volcano plots');
+        head
+            .append('small')
+            .text(
+                'Use selections below to filter the volcano plots. Click text to select a single level. Click Checkbox to toggle the level.'
+            );
 
         //initialize the filters
         if (settings.filterTypes) {
@@ -996,7 +1023,6 @@
             }
 
             if (settings.filterTypes.indexOf('List') > -1) {
-                this.filters.list.wrap.append('h5').text("List o' Filters");
                 this.filters.list.var = settings.structure_cols[0].value_col;
                 this.makeListVarSelect();
                 this.makeList();
@@ -1005,7 +1031,6 @@
 
             if (settings.filterTypes.indexOf('Tree') > -1) {
                 this.makeTree();
-                this.filters.tree.wrap.append('h5').text("Tree o' Filters");
                 this.filters.tree.wrap.classed('hidden', this.filters.current != 'Tree');
             }
 
@@ -1033,6 +1058,15 @@
             .data(chart.data.levels)
             .enter()
             .append('li')
+            .classed('active', function(d) {
+                return d.selected;
+            });
+
+        filters.list.inputs = filters.list.lis
+            .append('input')
+            .attr('type', 'checkbox')
+            .property('checked', true);
+        filters.list.links = filters.list.lis
             .append('a')
             .text(function(d) {
                 return d.key + ' (' + d.values + ')';
@@ -1043,10 +1077,39 @@
                     : '#999';
             });
 
-        filters.list.lis.on('click', function(d) {
-            chart.data.filtered = chart.data.clean.filter(function(f) {
-                return f[settings.color_col] == d.key;
+        //selected a single level
+        filters.list.links.on('click', function(d) {
+            var toggle = d3.select(this).property('checked');
+            var li = d3.select(this.parentNode);
+
+            //deselect all
+            filters.list.lis.each(function(d) {
+                d.selected = false;
             });
+            filters.list.lis.classed('active', false);
+            filters.list.inputs.property('checked', false);
+
+            //select this one
+            d.selected = true;
+            li.classed('active', true);
+            li.select('input').property('checked', true);
+
+            chart.data.filtered = chart.makeFilteredData();
+            chart.data.nested = chart.makeNestedData();
+            chart.plots.update();
+        });
+
+        //toggle a single level
+
+        filters.list.inputs.on('click', function(d) {
+            var li = d3.select(this.parentNode);
+            var toggle = li.select('input').property('checked');
+
+            li.select('input').property('checked');
+            li.classed('active', toggle);
+            d.selected = toggle;
+
+            chart.data.filtered = chart.makeFilteredData();
             chart.data.nested = chart.makeNestedData();
             chart.plots.update();
         });
@@ -1151,6 +1214,8 @@
             makeCleanData: makeCleanData,
             makeNestedData: makeNestedData,
             makeLevelData: makeLevelData,
+            makeFilteredData: makeFilteredData,
+
             checkCols: checkCols,
             plots: plots,
             tables: tables,

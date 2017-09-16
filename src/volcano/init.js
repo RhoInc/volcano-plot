@@ -14,8 +14,8 @@ export function init(data) {
     this.layout();
 
     this.data.clean = this.makeCleanData();
-    this.data.filtered = this.data.clean; //no filters on initial render;
     this.data.levels = this.makeLevelData();
+    this.data.filtered = this.data.clean; //no filters on initial render;
     this.makeScales();
     this.data.nested = this.makeNestedData();
 

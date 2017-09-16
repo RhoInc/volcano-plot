@@ -3,6 +3,7 @@ import { makeScales } from './volcano/makeScales';
 import { makeCleanData } from './volcano/makeCleanData.js';
 import { makeNestedData } from './volcano/makeNestedData.js';
 import { makeLevelData } from './volcano/makeLevelData.js';
+import { makeFilteredData } from './volcano/makeFilteredData.js';
 import { checkCols } from './volcano/checkCols.js';
 import { layout } from './volcano/layout';
 import { plots } from './volcano/plots';
@@ -19,6 +20,8 @@ export function createVolcano(element = 'body', config) {
         makeCleanData: makeCleanData,
         makeNestedData: makeNestedData,
         makeLevelData: makeLevelData,
+        makeFilteredData: makeFilteredData,
+
         checkCols: checkCols,
         plots: plots,
         tables: tables,

@@ -6,6 +6,9 @@
     display: none !important;
 }
 
+h1, h2, h3, h4, h5{
+  margin:0;
+}
 /*------------------------------------------------------------------------------------------------\
   Sidebar layout
 \------------------------------------------------------------------------------------------------*/
@@ -25,7 +28,9 @@
 /*------------------------------------------------------------------------------------------------\
   Controls
 \------------------------------------------------------------------------------------------------*/
-
+.ig-volcano .controls .head{
+  padding-bottom:1em;
+}
     .ig-volcano #search {
         float: right;
     }
@@ -51,10 +56,20 @@
 
     .ig-volcano div.controls .filter.list ul{
       list-style:none;
+      padding-left:0;
+
     }
 
     .ig-volcano div.controls .filter.list ul li{
       cursor:pointer;
+    }
+
+    .ig-volcano div.controls .filter.list ul li.active{
+      font-weight: bold;
+    }
+
+    .ig-volcano div.controls .filter.list ul li input{
+      margin-right:.2em;
     }
 /*------------------------------------------------------------------------------------------------\
   Plots

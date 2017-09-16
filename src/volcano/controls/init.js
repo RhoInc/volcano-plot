@@ -1,8 +1,13 @@
 export function init() {
     // make Header
-    this.wrap.append('h3').text('Controls');
+    var head = this.wrap.append('div').attr('class', 'head');
+    head.append('h3').text('Controls');
     // make instructions
-    this.wrap.append('span').text('Use selections below to filter the volcano plots');
+    head
+        .append('small')
+        .text(
+            'Use selections below to filter the volcano plots. Click text to select a single level. Click Checkbox to toggle the level.'
+        );
 
     //initialize the filters
     if (settings.filterTypes) {
@@ -23,7 +28,6 @@ export function init() {
         }
 
         if (settings.filterTypes.indexOf('List') > -1) {
-            this.filters.list.wrap.append('h5').text("List o' Filters");
             this.filters.list.var = settings.structure_cols[0].value_col;
             this.makeListVarSelect();
             this.makeList();
@@ -32,7 +36,6 @@ export function init() {
 
         if (settings.filterTypes.indexOf('Tree') > -1) {
             this.makeTree();
-            this.filters.tree.wrap.append('h5').text("Tree o' Filters");
             this.filters.tree.wrap.classed('hidden', this.filters.current != 'Tree');
         }
 
