@@ -26,4 +26,6 @@ export function start(chart) {
         .selectAll('path.hex')
         .attr('fill-opacity', 1)
         .classed('selected', false);
+
+    var highlights = chart.plots.svgs.selectAll('circle.highlighted').remove();
 }

@@ -39,6 +39,8 @@ export function end(chart) {
         });
 
         //Clear tables.
+        chart.wrap.selectAll('circle.highlighted,circle.clicked').remove();
+        delete chart.tables.selected.clicked;
         chart.tables.drawSelected.multiplier = 1;
         chart.tables.drawSelected([]);
         chart.tables.drawDetails();
