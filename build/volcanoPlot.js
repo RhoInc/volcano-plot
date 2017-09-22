@@ -1221,7 +1221,18 @@
             //update charts
             chart.data.filtered = chart.data.clean;
             chart.data.nested = chart.makeNestedData();
-            chart.plots.update();
+
+            chart.tables.drawSelected.multiplier = 1;
+            chart.tables.drawSelected([]);
+            chart.tables.drawDetails();
+            chart.wrap.classed('brushed', false);
+
+            chart.plots.multiples.forEach(function(m) {
+                m.data = chart.data.nested.filter(function(f) {
+                    return f.key == m.label;
+                })[0];
+                m.update();
+            });
         });
     }
 
