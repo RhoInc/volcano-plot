@@ -77,7 +77,26 @@
         return settings;
     }
 
+    function moveToFrontBack() {
+        d3.selection.prototype.moveToFront = function() {
+            return this.each(function() {
+                this.parentNode.appendChild(this);
+            });
+        };
+
+        d3.selection.prototype.moveToBack = function() {
+            return this.each(function() {
+                var firstChild = this.parentNode.firstChild;
+                if (firstChild) {
+                    this.parentNode.insertBefore(this, firstChild);
+                }
+            });
+        };
+    }
+
     function init(data) {
+        moveToFrontBack(); //intialize d3 extension
+
         this.wrap = d3
             .select(this.element)
             .append('div')

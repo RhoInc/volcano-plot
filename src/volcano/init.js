@@ -1,6 +1,8 @@
 import { setDefaults } from './setDefaults.js';
-
+import { moveToFrontBack } from './util/moveToFrontBack.js';
 export function init(data) {
+    moveToFrontBack(); //intialize d3 extension
+
     this.wrap = d3
         .select(this.element)
         .append('div')
