@@ -46,12 +46,13 @@ export function makeList() {
         chart.data.filtered = chart.makeFilteredData();
         chart.data.nested = chart.makeNestedData();
 
-        volcano.tables.drawSelected.multiplier = 1;
-        volcano.tables.drawSelected([]);
-        volcano.tables.drawDetails();
-        volcano.wrap.classed('brushed', false);
+        chart.tables.drawSelected.multiplier = 1;
+        chart.tables.drawSelected([]);
+        chart.tables.drawDetails();
+        chart.wrap.classed('brushed', false);
 
         chart.plots.multiples.forEach(function(m) {
+            m.data = chart.data.nested.filter(f => f.key == m.label)[0];
             m.update();
         });
     });
@@ -69,12 +70,13 @@ export function makeList() {
         chart.data.filtered = chart.makeFilteredData();
         chart.data.nested = chart.makeNestedData();
 
-        volcano.tables.drawSelected.multiplier = 1;
-        volcano.tables.drawSelected([]);
-        volcano.tables.drawDetails();
-        volcano.wrap.classed('brushed', false);
+        chart.tables.drawSelected.multiplier = 1;
+        chart.tables.drawSelected([]);
+        chart.tables.drawDetails();
+        chart.wrap.classed('brushed', false);
 
         chart.plots.multiples.forEach(function(m) {
+            m.data = chart.data.nested.filter(f => f.key == m.label)[0];
             m.update();
         });
     });

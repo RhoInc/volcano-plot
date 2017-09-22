@@ -11,7 +11,9 @@ export function update() {
         .select('rect.extent')
         .attr('height', 0)
         .attr('width', 0);
-    multiple.wrap.datum = multiple.data;
+
+    multiple.wrap.datum(multiple.data);
+    multiple.svg.datum(multiple.data);
     multiple.drawHexes();
     /*/bind the new data
     volcano.plots.multiples.forEach(function(m) {

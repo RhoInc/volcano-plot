@@ -677,7 +677,9 @@
             .select('rect.extent')
             .attr('height', 0)
             .attr('width', 0);
-        multiple.wrap.datum = multiple.data;
+
+        multiple.wrap.datum(multiple.data);
+        multiple.svg.datum(multiple.data);
         multiple.drawHexes();
         /*/bind the new data
     volcano.plots.multiples.forEach(function(m) {
@@ -1146,12 +1148,15 @@
             chart.data.filtered = chart.makeFilteredData();
             chart.data.nested = chart.makeNestedData();
 
-            volcano.tables.drawSelected.multiplier = 1;
-            volcano.tables.drawSelected([]);
-            volcano.tables.drawDetails();
-            volcano.wrap.classed('brushed', false);
+            chart.tables.drawSelected.multiplier = 1;
+            chart.tables.drawSelected([]);
+            chart.tables.drawDetails();
+            chart.wrap.classed('brushed', false);
 
             chart.plots.multiples.forEach(function(m) {
+                m.data = chart.data.nested.filter(function(f) {
+                    return f.key == m.label;
+                })[0];
                 m.update();
             });
         });
@@ -1169,12 +1174,15 @@
             chart.data.filtered = chart.makeFilteredData();
             chart.data.nested = chart.makeNestedData();
 
-            volcano.tables.drawSelected.multiplier = 1;
-            volcano.tables.drawSelected([]);
-            volcano.tables.drawDetails();
-            volcano.wrap.classed('brushed', false);
+            chart.tables.drawSelected.multiplier = 1;
+            chart.tables.drawSelected([]);
+            chart.tables.drawDetails();
+            chart.wrap.classed('brushed', false);
 
             chart.plots.multiples.forEach(function(m) {
+                m.data = chart.data.nested.filter(function(f) {
+                    return f.key == m.label;
+                })[0];
                 m.update();
             });
         });
