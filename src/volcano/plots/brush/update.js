@@ -1,5 +1,4 @@
 export function update(chart) {
-    var brush = chart.plots.brush;
     var settings = chart.config;
     var plots = chart.plots;
     var current = d3.select(this.parentNode.parentNode);

@@ -1,5 +1,4 @@
 export function end(chart) {
-    var brush = chart.plots.brush;
     var settings = chart.config;
     var plots = chart.plots;
     var current = d3.select(this.parentNode.parentNode);
@@ -51,7 +50,7 @@ export function end(chart) {
     }
 
     //draw hex overlays
-    plots.svgs.each(function(d) {
-        chart.plots.drawHexes(true);
+    plots.multiples.forEach(function(m) {
+        m.drawHexes(true);
     });
 }

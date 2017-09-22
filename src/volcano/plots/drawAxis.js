@@ -1,11 +1,14 @@
 export function drawAxis() {
-    var chart = this.parent;
-    var settings = this.parent.config;
-    chart.plots.svgs
+    var multiple = this;
+    var plots = this.parent;
+    var volcano = this.parent.parent;
+    var settings = volcano.config;
+
+    multiple.xAxis = multiple.svg
         .append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + settings.height + ')')
-        .call(chart.xAxis)
+        .call(volcano.xAxis)
         .append('text')
         .attr('class', 'label')
         .attr('font-size', '24')
@@ -15,25 +18,23 @@ export function drawAxis() {
         .style('text-anchor', 'middle')
         .text('Risk Ratio');
 
-    chart.plots.svgs.each(function(d, i) {
-        if (i == 0 || settings.showYaxis !== 'first') {
-            var yAxisWrap = d3
-                .select(this)
-                .append('g')
-                .attr('class', 'y axis')
-                .call(chart.yAxis);
+    if (multiple.index == 0 || settings.showYaxis !== 'first') {
+        multiple.yAxisWrap = multiple.svg
+            .append('g')
+            .attr('class', 'y axis')
+            .call(volcano.yAxis);
 
-            yAxisWrap
-                .append('text')
-                .attr('class', 'label')
-                .attr('transform', 'rotate(-90)')
-                .attr('y', 6)
-                .attr('dy', '-65px')
-                .attr('font-size', '24')
-                .attr('fill', '#999')
-                .style('text-anchor', 'end')
-                .text('p-value');
-            /*
+        multiple.yAxisWrap
+            .append('text')
+            .attr('class', 'label')
+            .attr('transform', 'rotate(-90)')
+            .attr('y', 6)
+            .attr('dy', '-65px')
+            .attr('font-size', '24')
+            .attr('fill', '#999')
+            .style('text-anchor', 'end')
+            .text('p-value');
+        /*
             yAxisWrap
                 .append('text')
                 .attr('class', 'label')
@@ -45,6 +46,5 @@ export function drawAxis() {
                 .style('text-anchor', 'end')
                 .text('(Click to change quadrants)');
         */
-        }
-    });
+    }
 }

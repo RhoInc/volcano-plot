@@ -370,23 +370,24 @@
             m.layout();
             m.drawAxis();
             m.drawHexes();
-            m.brush.parent = this;
+
+            m.brush.parent = m;
             m.brush.init();
         });
     }
 
     function layout$1() {
-        var chart = this.parent;
-        var settings = this.parent.config;
+        var multiple = this;
+        var plots = this.parent;
+        var volcano = this.parent.parent;
+        var settings = volcano.config;
 
-        chart.plots.svgs = chart.plots.wrap
-            .selectAll('div.volcanoPlot')
-            .data(chart.data.nested, function(d) {
-                return d.key;
-            })
-            .enter()
+        multiple.wrap = plots.wrap
             .append('div')
-            .attr('class', 'volcanoPlot')
+            .attr('class', 'multiple')
+            .datum(multiple.data);
+
+        multiple.svg = multiple.wrap
             .append('svg')
             .attr('height', settings.height + settings.margin.top + settings.margin.bottom)
             .attr('width', function(d, i) {
@@ -404,13 +405,16 @@
     }
 
     function drawAxis() {
-        var chart = this.parent;
-        var settings = this.parent.config;
-        chart.plots.svgs
+        var multiple = this;
+        var plots = this.parent;
+        var volcano = this.parent.parent;
+        var settings = volcano.config;
+
+        multiple.xAxis = multiple.svg
             .append('g')
             .attr('class', 'x axis')
             .attr('transform', 'translate(0,' + settings.height + ')')
-            .call(chart.xAxis)
+            .call(volcano.xAxis)
             .append('text')
             .attr('class', 'label')
             .attr('font-size', '24')
@@ -420,25 +424,23 @@
             .style('text-anchor', 'middle')
             .text('Risk Ratio');
 
-        chart.plots.svgs.each(function(d, i) {
-            if (i == 0 || settings.showYaxis !== 'first') {
-                var yAxisWrap = d3
-                    .select(this)
-                    .append('g')
-                    .attr('class', 'y axis')
-                    .call(chart.yAxis);
+        if (multiple.index == 0 || settings.showYaxis !== 'first') {
+            multiple.yAxisWrap = multiple.svg
+                .append('g')
+                .attr('class', 'y axis')
+                .call(volcano.yAxis);
 
-                yAxisWrap
-                    .append('text')
-                    .attr('class', 'label')
-                    .attr('transform', 'rotate(-90)')
-                    .attr('y', 6)
-                    .attr('dy', '-65px')
-                    .attr('font-size', '24')
-                    .attr('fill', '#999')
-                    .style('text-anchor', 'end')
-                    .text('p-value');
-                /*
+            multiple.yAxisWrap
+                .append('text')
+                .attr('class', 'label')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 6)
+                .attr('dy', '-65px')
+                .attr('font-size', '24')
+                .attr('fill', '#999')
+                .style('text-anchor', 'end')
+                .text('p-value');
+            /*
             yAxisWrap
                 .append('text')
                 .attr('class', 'label')
@@ -449,129 +451,125 @@
                 .attr('fill', '#999')
                 .style('text-anchor', 'end')
                 .text('(Click to change quadrants)');
-            */
-            }
-        });
+        */
+        }
     }
 
     function drawHexes() {
         var overlay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
-        var chart = this.parent;
-        var settings = this.parent.config;
-        chart.plots.svgs.each(function(d) {
-            //draw the main hexes/circles
-            var pointGroups = d3
-                .select(this)
-                .selectAll('g.hexGroups')
-                .data(overlay ? d.overlay : d.hexData)
-                .enter()
-                .append('g')
-                .attr('class', 'hexGroup')
-                .classed('overlay', overlay);
+        var multiple = this;
+        var plots = this.parent;
+        var volcano = this.parent.parent;
+        var settings = volcano.config;
 
-            pointGroups.each(function(d) {
-                if (d.drawCircles) {
-                    d3
-                        .select(this)
-                        .selectAll('circle')
-                        .data(d)
-                        .enter()
-                        .append('circle')
-                        .attr('class', 'point')
-                        .attr('cx', function(d) {
-                            return chart.x(d[settings.ratio_col]);
-                        })
-                        .attr('cy', function(d) {
-                            return chart.y(d[settings.p_col]);
-                        })
-                        .attr('r', 2)
-                        .attr('fill', function(d) {
-                            return overlay
-                                ? 'white'
-                                : chart.colorScale.domain().indexOf(d[settings.color_col]) > -1
-                                  ? chart.colorScale(d[settings.color_col])
-                                  : '#999';
-                        });
-                } else {
-                    d3
-                        .select(this)
-                        .append('path')
-                        .attr('class', 'hex')
-                        .attr('d', function(d) {
-                            return chart.hexbin.hexagon(chart.radiusScale(d.size));
-                        })
-                        .attr('transform', function(d) {
-                            return 'translate(' + d.x + ',' + d.y + ')';
-                        })
-                        .attr('fill', function(d) {
-                            return overlay ? 'white' : d.color;
-                        });
-                }
-            });
+        //draw the main hexes/circles
+        multiple.pointGroups = multiple.svg
+            .selectAll('g.hexGroups')
+            .data(function(d) {
+                return overlay ? d.overlay : d.hexData;
+            })
+            .enter()
+            .append('g')
+            .attr('class', 'hexGroup')
+            .classed('overlay', overlay);
+
+        multiple.pointGroups.each(function(d) {
+            if (d.drawCircles) {
+                d3
+                    .select(this)
+                    .selectAll('circle')
+                    .data(d)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'point')
+                    .attr('cx', function(d) {
+                        return volcano.x(d[settings.ratio_col]);
+                    })
+                    .attr('cy', function(d) {
+                        return volcano.y(d[settings.p_col]);
+                    })
+                    .attr('r', 2)
+                    .attr('fill', function(d) {
+                        return overlay
+                            ? 'white'
+                            : volcano.colorScale.domain().indexOf(d[settings.color_col]) > -1
+                              ? volcano.colorScale(d[settings.color_col])
+                              : '#999';
+                    });
+            } else {
+                d3
+                    .select(this)
+                    .append('path')
+                    .attr('class', 'hex')
+                    .attr('d', function(d) {
+                        return volcano.hexbin.hexagon(volcano.radiusScale(d.size));
+                    })
+                    .attr('transform', function(d) {
+                        return 'translate(' + d.x + ',' + d.y + ')';
+                    })
+                    .attr('fill', function(d) {
+                        return overlay ? 'white' : d.color;
+                    });
+            }
         });
     }
 
     function init$2() {
         var brush = this;
-        var plots = this.parent;
-        var chart = this.parent.parent;
+        var multiple = this.parent;
+        var plots = this.parent.parent;
+        var volcano = this.parent.parent.parent;
+        var settings = volcano.config;
 
-        chart.plots.svgs.each(function(d) {
-            d3
-                .select(this)
-                .append('g')
-                .attr('class', 'brush')
-                .call(
-                    d3.svg
-                        .brush()
-                        .x(chart.x)
-                        .y(chart.y)
-                        .on('brushstart', function(d) {
-                            brush.start.call(this, chart);
-                        })
-                        .on('brush', function(d) {
-                            brush.update.call(this, chart);
-                        })
-                        .on('brushend', function(d) {
-                            brush.end.call(this, chart);
-                        })
-                );
-        });
+        brush.wrap = multiple.svg.append('g').attr('class', 'brush');
+        brush.brush = d3.svg
+            .brush()
+            .x(volcano.x)
+            .y(volcano.y)
+            .on('brushstart', function(d) {
+                brush.start.call(this, volcano);
+            })
+            .on('brush', function(d) {
+                brush.update.call(this, volcano);
+            })
+            .on('brushend', function(d) {
+                brush.end.call(this, volcano);
+            });
+        brush.wrap.call(brush.brush);
     }
 
     function start(chart) {
-        var brush = chart.plots.brush;
         var plots = chart.plots;
         var current = d3.select(this.parentNode.parentNode);
+        var svgs = plots.wrap.selectAll('div.multiple').select('svg');
 
         chart.wrap.classed('brushed', true);
-        plots.svgs.classed('brushing', false);
+        svgs.classed('brushing', false);
         current.classed('brushing', true);
 
         //clear all brushed hexes
         d3.selectAll('g.hexGroup.overlay').remove();
 
         //clear any brush rectangles in other panels
-        chart.plots.svgs
+        svgs
             .selectAll('g:not(.brushing) g.brush rect.extent')
             .attr('height', 0)
             .attr('width', 0);
 
         //de-select all hexgroups
-        var points = chart.plots.svgs
+        var points = svgs
             .selectAll('circle.point')
             .attr('fill-opacity', 1)
             .classed('selected', false);
 
-        var hexes = chart.plots.svgs
+        var hexes = svgs
             .selectAll('path.hex')
             .attr('fill-opacity', 1)
             .classed('selected', false);
     }
 
     function update(chart) {
-        var brush = chart.plots.brush;
         var settings = chart.config;
         var plots = chart.plots;
         var current = d3.select(this.parentNode.parentNode);
@@ -603,7 +601,6 @@
     }
 
     function end(chart) {
-        var brush = chart.plots.brush;
         var settings = chart.config;
         var plots = chart.plots;
         var current = d3.select(this.parentNode.parentNode);
@@ -655,8 +652,8 @@
         }
 
         //draw hex overlays
-        plots.svgs.each(function(d) {
-            chart.plots.drawHexes(true);
+        plots.multiples.forEach(function(m) {
+            m.drawHexes(true);
         });
     }
 
@@ -669,24 +666,26 @@
 
     function update$1() {
         //clear stuff
-        var chart = this.parent;
-        var settings = this.parent.config;
-        chart.plots.wrap.selectAll('g.hexGroup').remove();
-        chart.tables.drawSelected.multiplier = 1;
-        chart.tables.drawSelected([]);
-        chart.tables.drawDetails();
-        chart.wrap.classed('brushed', false);
-        chart.wrap
-            .selectAll('g.brush')
+        var multiple = this;
+        var plots = this.parent;
+        var volcano = this.parent.parent;
+        var settings = volcano.config;
+
+        multiple.wrap.selectAll('g.hexGroup').remove();
+
+        multiple.brush.wrap
             .select('rect.extent')
             .attr('height', 0)
             .attr('width', 0);
-
-        //bind the new data
-        chart.plots.svgs.data(chart.data.nested, function(d) {
-            return d.key;
-        });
+        multiple.wrap.datum = multiple.data;
+        multiple.drawHexes();
+        /*/bind the new data
+    volcano.plots.multiples.forEach(function(m) {
+        var current = chart.data.nested.filter(f => f.key == m.key);
+        m.wrap.data(current);
         this.drawHexes();
+    });
+    */
     }
 
     //create the small multiples
@@ -694,9 +693,10 @@
         var plots = this;
         var volcano = this.parent;
 
-        plots.multiples = volcano.data.nested.map(function(d) {
+        plots.multiples = volcano.data.nested.map(function(d, i) {
+            console.log(d);
             var multiple = {
-                init: init$1,
+                index: i,
                 layout: layout$1,
                 drawAxis: drawAxis,
                 drawHexes: drawHexes,
@@ -708,8 +708,8 @@
             multiple.volcano = volcano;
             multiple.label = d.key;
 
-            multiple.data.raw = d.raw;
-            multiple.data.hexData = d.hexData;
+            multiple.data = d;
+
             return multiple;
         });
     }
@@ -1145,7 +1145,15 @@
 
             chart.data.filtered = chart.makeFilteredData();
             chart.data.nested = chart.makeNestedData();
-            chart.plots.update();
+
+            volcano.tables.drawSelected.multiplier = 1;
+            volcano.tables.drawSelected([]);
+            volcano.tables.drawDetails();
+            volcano.wrap.classed('brushed', false);
+
+            chart.plots.multiples.forEach(function(m) {
+                m.update();
+            });
         });
 
         //toggle a single level
@@ -1160,7 +1168,15 @@
 
             chart.data.filtered = chart.makeFilteredData();
             chart.data.nested = chart.makeNestedData();
-            chart.plots.update();
+
+            volcano.tables.drawSelected.multiplier = 1;
+            volcano.tables.drawSelected([]);
+            volcano.tables.drawDetails();
+            volcano.wrap.classed('brushed', false);
+
+            chart.plots.multiples.forEach(function(m) {
+                m.update();
+            });
         });
     }
 

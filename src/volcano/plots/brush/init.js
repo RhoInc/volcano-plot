@@ -1,27 +1,23 @@
 export function init() {
     var brush = this;
-    var plots = this.parent;
-    var chart = this.parent.parent;
+    var multiple = this.parent;
+    var plots = this.parent.parent;
+    var volcano = this.parent.parent.parent;
+    var settings = volcano.config;
 
-    chart.plots.svgs.each(function(d) {
-        d3
-            .select(this)
-            .append('g')
-            .attr('class', 'brush')
-            .call(
-                d3.svg
-                    .brush()
-                    .x(chart.x)
-                    .y(chart.y)
-                    .on('brushstart', function(d) {
-                        brush.start.call(this, chart);
-                    })
-                    .on('brush', function(d) {
-                        brush.update.call(this, chart);
-                    })
-                    .on('brushend', function(d) {
-                        brush.end.call(this, chart);
-                    })
-            );
-    });
+    brush.wrap = multiple.svg.append('g').attr('class', 'brush');
+    brush.brush = d3.svg
+        .brush()
+        .x(volcano.x)
+        .y(volcano.y)
+        .on('brushstart', function(d) {
+            brush.start.call(this, volcano);
+        })
+        .on('brush', function(d) {
+            brush.update.call(this, volcano);
+        })
+        .on('brushend', function(d) {
+            brush.end.call(this, volcano);
+        });
+    brush.wrap.call(brush.brush);
 }

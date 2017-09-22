@@ -45,7 +45,15 @@ export function makeList() {
 
         chart.data.filtered = chart.makeFilteredData();
         chart.data.nested = chart.makeNestedData();
-        chart.plots.update();
+
+        volcano.tables.drawSelected.multiplier = 1;
+        volcano.tables.drawSelected([]);
+        volcano.tables.drawDetails();
+        volcano.wrap.classed('brushed', false);
+
+        chart.plots.multiples.forEach(function(m) {
+            m.update();
+        });
     });
 
     //toggle a single level
@@ -60,6 +68,14 @@ export function makeList() {
 
         chart.data.filtered = chart.makeFilteredData();
         chart.data.nested = chart.makeNestedData();
-        chart.plots.update();
+
+        volcano.tables.drawSelected.multiplier = 1;
+        volcano.tables.drawSelected([]);
+        volcano.tables.drawDetails();
+        volcano.wrap.classed('brushed', false);
+
+        chart.plots.multiples.forEach(function(m) {
+            m.update();
+        });
     });
 }

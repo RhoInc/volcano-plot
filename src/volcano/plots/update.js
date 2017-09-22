@@ -1,21 +1,23 @@
 export function update() {
     //clear stuff
-    var chart = this.parent;
-    var settings = this.parent.config;
-    chart.plots.wrap.selectAll('g.hexGroup').remove();
-    chart.tables.drawSelected.multiplier = 1;
-    chart.tables.drawSelected([]);
-    chart.tables.drawDetails();
-    chart.wrap.classed('brushed', false);
-    chart.wrap
-        .selectAll('g.brush')
+    var multiple = this;
+    var plots = this.parent;
+    var volcano = this.parent.parent;
+    var settings = volcano.config;
+
+    multiple.wrap.selectAll('g.hexGroup').remove();
+
+    multiple.brush.wrap
         .select('rect.extent')
         .attr('height', 0)
         .attr('width', 0);
-
-    //bind the new data
-    chart.plots.svgs.data(chart.data.nested, function(d) {
-        return d.key;
+    multiple.wrap.datum = multiple.data;
+    multiple.drawHexes();
+    /*/bind the new data
+    volcano.plots.multiples.forEach(function(m) {
+        var current = chart.data.nested.filter(f => f.key == m.key);
+        m.wrap.data(current);
+        this.drawHexes();
     });
-    this.drawHexes();
+    */
 }

@@ -1,15 +1,15 @@
 export function layout() {
-    var chart = this.parent;
-    var settings = this.parent.config;
+    var multiple = this;
+    var plots = this.parent;
+    var volcano = this.parent.parent;
+    var settings = volcano.config;
 
-    chart.plots.svgs = chart.plots.wrap
-        .selectAll('div.volcanoPlot')
-        .data(chart.data.nested, function(d) {
-            return d.key;
-        })
-        .enter()
+    multiple.wrap = plots.wrap
         .append('div')
-        .attr('class', 'volcanoPlot')
+        .attr('class', 'multiple')
+        .datum(multiple.data);
+
+    multiple.svg = multiple.wrap
         .append('svg')
         .attr('height', settings.height + settings.margin.top + settings.margin.bottom)
         .attr('width', function(d, i) {

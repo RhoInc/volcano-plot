@@ -75,7 +75,7 @@ h1, h2, h3, h4, h5{
   Plots
 \------------------------------------------------------------------------------------------------*/
 
-    div.volcanoPlot {
+    .ig-volcano div.charts div.multiple{
         display:inline-block;
     }
 

@@ -10,7 +10,8 @@ export function init() {
         m.layout();
         m.drawAxis();
         m.drawHexes();
-        m.brush.parent = this;
+
+        m.brush.parent = m;
         m.brush.init();
     });
 }
