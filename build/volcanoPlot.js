@@ -359,11 +359,20 @@
     }
 
     function init$1() {
-        this.layout();
-        this.drawAxis();
-        this.drawHexes();
-        this.brush.parent = this;
-        this.brush.init();
+        var volcano = this.parent;
+        var plots = this;
+
+        //create the multiples objects
+        this.createMultiples();
+
+        //initialize the charts
+        this.multiples.forEach(function(m) {
+            m.layout();
+            m.drawAxis();
+            m.drawHexes();
+            m.brush.parent = this;
+            m.brush.init();
+        });
     }
 
     function layout$1() {
@@ -680,13 +689,34 @@
         this.drawHexes();
     }
 
+    //create the small multiples
+    function createMultiples() {
+        var plots = this;
+        var volcano = this.parent;
+
+        plots.multiples = volcano.data.nested.map(function(d) {
+            var multiple = {
+                init: init$1,
+                layout: layout$1,
+                drawAxis: drawAxis,
+                drawHexes: drawHexes,
+                brush: brush,
+                update: update$1
+            };
+
+            multiple.parent = plots;
+            multiple.volcano = volcano;
+            multiple.label = d.key;
+
+            multiple.data.raw = d.raw;
+            multiple.data.hexData = d.hexData;
+            return multiple;
+        });
+    }
+
     var plots = {
         init: init$1,
-        layout: layout$1,
-        drawAxis: drawAxis,
-        drawHexes: drawHexes,
-        brush: brush,
-        update: update$1
+        createMultiples: createMultiples
     };
 
     function init$3() {
