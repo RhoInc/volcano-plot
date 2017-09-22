@@ -77,7 +77,26 @@
         return settings;
     }
 
+    function moveToFrontBack() {
+        d3.selection.prototype.moveToFront = function() {
+            return this.each(function() {
+                this.parentNode.appendChild(this);
+            });
+        };
+
+        d3.selection.prototype.moveToBack = function() {
+            return this.each(function() {
+                var firstChild = this.parentNode.firstChild;
+                if (firstChild) {
+                    this.parentNode.insertBefore(this, firstChild);
+                }
+            });
+        };
+    }
+
     function init(data) {
+        moveToFrontBack(); //extend d3
+
         this.wrap = d3
             .select(this.element)
             .append('div')
@@ -499,9 +518,13 @@
                         .brush()
                         .x(chart.x)
                         .y(chart.y)
-                        .on('brushstart', function(d) {
-                            brush.start.call(this, chart);
-                        })
+                        .on(
+                            'brushstart',
+                            function(d) {
+                                brush.start.call(this, chart);
+                            },
+                            true
+                        )
                         .on('brush', function(d) {
                             brush.update.call(this, chart);
                         })
@@ -510,6 +533,21 @@
                         })
                 );
         });
+        brush.wraps = chart.plots.svgs.select('g.brush').moveToBack();
+        chart.plots.svgs
+            .on(
+                'mousedown',
+                function() {
+                    console.log('Mouse is down');
+                    brush.wraps.moveToFront();
+                    //brush.start.call(thisBrush, chart);
+                },
+                true //capture event
+            )
+            .on('mouseup', function() {
+                brush.wraps.moveToBack();
+                console.log('mouse is up');
+            });
     }
 
     function start(chart) {

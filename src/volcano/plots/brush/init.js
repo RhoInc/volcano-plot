@@ -13,9 +13,12 @@ export function init() {
                     .brush()
                     .x(chart.x)
                     .y(chart.y)
-                    .on('brushstart', function(d) {
-                        brush.start.call(this, chart);
-                    })
+                    .on(
+                        'brushstart',
+                        function(d) {
+                            brush.start.call(this, chart);
+                        }
+                    )
                     .on('brush', function(d) {
                         brush.update.call(this, chart);
                     })
@@ -24,4 +27,20 @@ export function init() {
                     })
             );
     });
+    brush.wraps = chart.plots.svgs.select('g.brush').moveToBack();
+    chart.plots.svgs
+        .on(
+            'mousedown',
+            function() {
+                console.log('Mouse is down');
+                brush.wraps.moveToFront();
+                //brush.start.call(thisBrush, chart);
+            },
+            true
+             //capture event
+        )
+        .on('mouseup', function() {
+            brush.wraps.moveToBack();
+            console.log('mouse is up');
+        });
 }
