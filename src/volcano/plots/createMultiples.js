@@ -7,6 +7,7 @@ import { init as brushinit } from './brush/init';
 import { start as brushstart } from './brush/start';
 import { update as brushupdate } from './brush/update';
 import { end as brushend } from './brush/end';
+import { init as highlightinit } from './highlight/init';
 
 export function createMultiples() {
     var plots = this;
@@ -24,6 +25,9 @@ export function createMultiples() {
                 start: brushstart,
                 update: brushupdate,
                 end: brushend
+            },
+            highlight: {
+                init: highlightinit
             }
         };
 
@@ -31,6 +35,8 @@ export function createMultiples() {
         multiple.volcano = volcano;
         multiple.label = d.key;
         multiple.data = d;
+        multiple.brush.parent = multiple;
+        multiple.highlight.parent = multiple;
 
         return multiple;
     });

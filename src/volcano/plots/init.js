@@ -8,10 +8,11 @@ export function init() {
     //initialize the charts
     this.multiples.forEach(function(m) {
         m.layout();
-        m.drawAxis();
-        m.drawHexes();
-
         m.brush.parent = m;
         m.brush.init();
+
+        m.drawAxis();
+        m.drawHexes();
+        m.highlight.init();
     });
 }

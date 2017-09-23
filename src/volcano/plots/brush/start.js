@@ -28,14 +28,4 @@ export function start(multiple) {
         .selectAll('path.hex')
         .attr('fill-opacity', 1)
         .classed('selected', false);
-
-    /*
-    console.log(multiple.brush.brush.extent());
-    var m = d3.mouse(multiple.svg.node());
-    console.log(m);
-    var p = [volcano.x.invert(m[0]), volcano.y.invert(m[1])];
-    console.log(p);
-    multiple.brush.brush.extent([p, p]);
-    console.log(multiple.brush.brush.extent());
-    */
 }

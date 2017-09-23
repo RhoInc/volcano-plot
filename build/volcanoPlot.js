@@ -368,11 +368,12 @@
         //initialize the charts
         this.multiples.forEach(function(m) {
             m.layout();
-            m.drawAxis();
-            m.drawHexes();
-
             m.brush.parent = m;
             m.brush.init();
+
+            m.drawAxis();
+            m.drawHexes();
+            m.highlight.init();
         });
     }
 
@@ -565,34 +566,7 @@
             });
         multiple.svg.call(brush.brush);
         //multiple.svg.select('rect.extent').moveToBack();
-        multiple.svg.select('rect.background').moveToBack();
-
-        /* --- Simulate brush.start on mousedown within a circle or hex --- */
-        var marks = multiple.svg.selectAll('g.hexGroup');
-
-        marks
-            .on('mouseover', function() {
-                console.log('in');
-                d3
-                    .select(this)
-                    .selectAll('*')
-                    .attr('stroke', 'black')
-                    .attr('stroke-width', '2px');
-            })
-            .on('mouseout', function() {
-                d3
-                    .select(this)
-                    .selectAll('*')
-                    .attr('stroke', null)
-                    .attr('stroke-width', null);
-            })
-            .on('mousedown', function(d) {
-                var m = d3.mouse(multiple.svg.node());
-                var p = [volcano.x.invert(m[0]), volcano.y.invert(m[1])];
-                brush.brush.extent([p, p]);
-                //brush.start.call(this, multiple);
-                //brush.update.call(this, volcano);
-            });
+        //multiple.svg.select('rect.background').moveToBack();
     }
 
     function start(multiple) {
@@ -609,6 +583,7 @@
         d3.selectAll('g.hexGroup.overlay').remove();
 
         //clear any brush rectangles in other panels
+
         svgs
             .selectAll('g:not(.brushing) rect.extent')
             .attr('height', 0)
@@ -624,14 +599,6 @@
             .selectAll('path.hex')
             .attr('fill-opacity', 1)
             .classed('selected', false);
-
-        console.log(multiple.brush.brush.extent());
-        var m = d3.mouse(multiple.svg.node());
-        console.log(m);
-        var p = [volcano.x.invert(m[0]), volcano.y.invert(m[1])];
-        console.log(p);
-        multiple.brush.brush.extent([p, p]);
-        console.log(multiple.brush.brush.extent());
     }
 
     function update$1(multiple) {
@@ -724,6 +691,37 @@
         });
     }
 
+    function init$3() {
+        var multiple = this.parent;
+        var volcano = this.parent.parent.parent;
+        var marks = multiple.svg.selectAll('g.hexGroup');
+        var brush = multiple.brush;
+
+        marks
+            .on('mouseover', function() {
+                console.log('in');
+                d3
+                    .select(this)
+                    .selectAll('*')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', '2px');
+            })
+            .on('mouseout', function() {
+                d3
+                    .select(this)
+                    .selectAll('*')
+                    .attr('stroke', null)
+                    .attr('stroke-width', null);
+            })
+            .on('mousedown', function(d) {
+                var m = d3.mouse(multiple.svg.node());
+                var p = [volcano.x.invert(m[0]), volcano.y.invert(m[1])];
+                brush.brush.extent([p, p]);
+                //brush.start.call(this, multiple);
+                //brush.update.call(this, volcano);
+            });
+    }
+
     //create the small multiples
     function createMultiples() {
         var plots = this;
@@ -741,6 +739,9 @@
                     start: start,
                     update: update$1,
                     end: end
+                },
+                highlight: {
+                    init: init$3
                 }
             };
 
@@ -748,6 +749,8 @@
             multiple.volcano = volcano;
             multiple.label = d.key;
             multiple.data = d;
+            multiple.brush.parent = multiple;
+            multiple.highlight.parent = multiple;
 
             return multiple;
         });
@@ -758,7 +761,7 @@
         createMultiples: createMultiples
     };
 
-    function init$3() {
+    function init$4() {
         var settings = this.parent.config;
 
         this.selected = {
@@ -1075,13 +1078,13 @@
     }
 
     var tables = {
-        init: init$3,
+        init: init$4,
         layout: layout$2,
         drawSelected: drawSelected,
         drawDetails: drawDetails
     };
 
-    function init$4() {
+    function init$5() {
         // make Header
         var head = this.wrap.append('div').attr('class', 'head');
         head.append('h3').text('Controls');
@@ -1314,7 +1317,7 @@
     }
 
     var controls = {
-        init: init$4,
+        init: init$5,
         layout: layout$3,
         makeList: makeList,
         makeTree: makeTree,
