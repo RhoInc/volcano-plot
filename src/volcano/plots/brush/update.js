@@ -1,10 +1,12 @@
-export function update(chart) {
-    var settings = chart.config;
-    var plots = chart.plots;
-    var current = d3.select(this.parentNode.parentNode);
+export function update(multiple) {
+    var volcano = multiple.parent.parent;
+    var plots = multiple.parent;
+    var settings = volcano.config;
+    var current = multiple.svg;
     var points = current.selectAll('circle.point');
     var hexes = current.selectAll('path.hex');
-    var e = d3.event.target.extent();
+    var e = multiple.brush.brush.extent();
+    console.log('updating');
 
     //Flag selected points and hexes
     //note - the hex data is stored in pixels, but the point data and brush data is in raw units, so we have to handle transforms accordingly.
@@ -18,8 +20,8 @@ export function update(chart) {
     });
 
     hexes.classed('selected', function(d) {
-        var x_raw = chart.x.invert(d.x);
-        var y_raw = chart.y.invert(d.y);
+        var x_raw = volcano.x.invert(d.x);
+        var y_raw = volcano.y.invert(d.y);
 
         return e[0][0] <= x_raw && x_raw <= e[1][0] && e[0][1] <= y_raw && y_raw <= e[1][1]; // note - the order is flipped here because of the inverted pixel scale
     });

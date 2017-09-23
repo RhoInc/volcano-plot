@@ -524,8 +524,7 @@
 
         multiple.wrap.selectAll('g.hexGroup').remove();
 
-        console.log(multiple);
-        multiple.brush.wrap
+        multiple.svg
             .select('rect.extent')
             .attr('height', 0)
             .attr('width', 0);
@@ -549,29 +548,60 @@
         var volcano = this.parent.parent.parent;
         var settings = volcano.config;
 
-        brush.wrap = multiple.svg.append('g').attr('class', 'brush');
+        /* --- Standard Brush Initialization --- */
+        //brush.wrap = multiple.svg.append('g').attr('class', 'brush');
         brush.brush = d3.svg
             .brush()
             .x(volcano.x)
             .y(volcano.y)
             .on('brushstart', function(d) {
-                brush.start.call(this, volcano);
+                brush.start.call(this, multiple);
             })
             .on('brush', function(d) {
-                brush.update.call(this, volcano);
+                brush.update.call(this, multiple);
             })
             .on('brushend', function(d) {
-                brush.end.call(this, volcano);
+                brush.end.call(this, multiple);
             });
-        brush.wrap.call(brush.brush);
+        multiple.svg.call(brush.brush);
+        //multiple.svg.select('rect.extent').moveToBack();
+        multiple.svg.select('rect.background').moveToBack();
+
+        /* --- Simulate brush.start on mousedown within a circle or hex --- */
+        var marks = multiple.svg.selectAll('g.hexGroup');
+
+        marks
+            .on('mouseover', function() {
+                console.log('in');
+                d3
+                    .select(this)
+                    .selectAll('*')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', '2px');
+            })
+            .on('mouseout', function() {
+                d3
+                    .select(this)
+                    .selectAll('*')
+                    .attr('stroke', null)
+                    .attr('stroke-width', null);
+            })
+            .on('mousedown', function(d) {
+                var m = d3.mouse(multiple.svg.node());
+                var p = [volcano.x.invert(m[0]), volcano.y.invert(m[1])];
+                brush.brush.extent([p, p]);
+                //brush.start.call(this, multiple);
+                //brush.update.call(this, volcano);
+            });
     }
 
-    function start(chart) {
-        var plots = chart.plots;
+    function start(multiple) {
+        var volcano = multiple.parent.parent;
+        var plots = multiple.parent;
         var current = d3.select(this.parentNode.parentNode);
         var svgs = plots.wrap.selectAll('div.multiple').select('svg');
 
-        chart.wrap.classed('brushed', true);
+        volcano.wrap.classed('brushed', true);
         svgs.classed('brushing', false);
         current.classed('brushing', true);
 
@@ -580,7 +610,7 @@
 
         //clear any brush rectangles in other panels
         svgs
-            .selectAll('g:not(.brushing) g.brush rect.extent')
+            .selectAll('g:not(.brushing) rect.extent')
             .attr('height', 0)
             .attr('width', 0);
 
@@ -594,15 +624,25 @@
             .selectAll('path.hex')
             .attr('fill-opacity', 1)
             .classed('selected', false);
+
+        console.log(multiple.brush.brush.extent());
+        var m = d3.mouse(multiple.svg.node());
+        console.log(m);
+        var p = [volcano.x.invert(m[0]), volcano.y.invert(m[1])];
+        console.log(p);
+        multiple.brush.brush.extent([p, p]);
+        console.log(multiple.brush.brush.extent());
     }
 
-    function update$1(chart) {
-        var settings = chart.config;
-        var plots = chart.plots;
-        var current = d3.select(this.parentNode.parentNode);
+    function update$1(multiple) {
+        var volcano = multiple.parent.parent;
+        var plots = multiple.parent;
+        var settings = volcano.config;
+        var current = multiple.svg;
         var points = current.selectAll('circle.point');
         var hexes = current.selectAll('path.hex');
-        var e = d3.event.target.extent();
+        var e = multiple.brush.brush.extent();
+        console.log('updating');
 
         //Flag selected points and hexes
         //note - the hex data is stored in pixels, but the point data and brush data is in raw units, so we have to handle transforms accordingly.
@@ -616,8 +656,8 @@
         });
 
         hexes.classed('selected', function(d) {
-            var x_raw = chart.x.invert(d.x);
-            var y_raw = chart.y.invert(d.y);
+            var x_raw = volcano.x.invert(d.x);
+            var y_raw = volcano.y.invert(d.y);
 
             return e[0][0] <= x_raw && x_raw <= e[1][0] && e[0][1] <= y_raw && y_raw <= e[1][1]; // note - the order is flipped here because of the inverted pixel scale
         });
@@ -627,10 +667,11 @@
         //d3.selectAll("#"+outcome+" svg g g.allpoints g.points.selected").classed("active",true)
     }
 
-    function end(chart) {
-        var settings = chart.config;
-        var plots = chart.plots;
-        var current = d3.select(this.parentNode.parentNode);
+    function end(multiple) {
+        var volcano = multiple.parent.parent;
+        var plots = multiple.parent;
+        var settings = volcano.config;
+        var current = multiple.svg;
 
         //	build a data set of the selected taxa
         var current_points = current.selectAll('circle.selected').data();
@@ -643,17 +684,17 @@
         //prep hex overlay data
         if (currentIDs.length) {
             //Nest brushed data.
-            chart.data.overlay = chart.makeNestedData(currentIDs);
+            volcano.data.overlay = volcano.makeNestedData(currentIDs);
 
             //Draw brushed data.
-            chart.tables.drawSelected.multiplier = 1;
-            chart.tables.drawSelected(chart.data.brushed);
-            chart.tables.drawDetails();
+            volcano.tables.drawSelected.multiplier = 1;
+            volcano.tables.drawSelected(volcano.data.brushed);
+            volcano.tables.drawDetails();
 
             //Clear brush?
-            chart.data.nested.forEach(function(d) {
+            volcano.data.nested.forEach(function(d) {
                 if (d.key != current.data()[0].key) {
-                    d.overlay = chart.data.overlay.filter(function(e) {
+                    d.overlay = volcano.data.overlay.filter(function(e) {
                         return e.key == d.key;
                     })[0].hexData;
                 } else {
@@ -661,17 +702,16 @@
                 }
             });
         } else {
-            chart.wrap.classed('brushed', false);
-            chart.data.nested.forEach(function(d) {
+            volcano.wrap.classed('brushed', false);
+            volcano.data.nested.forEach(function(d) {
                 d.overlay = [];
             });
 
             //Clear tables.
-            chart.tables.drawSelected.multiplier = 1;
-            chart.tables.drawSelected([]);
-            chart.tables.drawDetails();
+            volcano.tables.drawSelected.multiplier = 1;
+            volcano.tables.drawDetails();
 
-            chart.wrap
+            volcano.wrap
                 .selectAll('g.brush')
                 .select('rect.extent')
                 .attr('height', 0)

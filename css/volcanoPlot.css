@@ -89,11 +89,11 @@ h1, h2, h3, h4, h5{
 
 
     /* brush formatting */
-    g.brush rect.extent {
+    .ig-volcano rect.extent {
         stroke:"#bbb";
         fill-opacity:0.1;
     }
-    g.brush rect.extent{
+    .ig-volcano rect.extent{
         stroke:"#bbb";
         fill-opacity:0.1;
     }

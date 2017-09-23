@@ -1,7 +1,8 @@
-export function end(chart) {
-    var settings = chart.config;
-    var plots = chart.plots;
-    var current = d3.select(this.parentNode.parentNode);
+export function end(multiple) {
+    var volcano = multiple.parent.parent;
+    var plots = multiple.parent;
+    var settings = volcano.config;
+    var current = multiple.svg;
 
     //	build a data set of the selected taxa
     var current_points = current.selectAll('circle.selected').data();
@@ -14,17 +15,17 @@ export function end(chart) {
     //prep hex overlay data
     if (currentIDs.length) {
         //Nest brushed data.
-        chart.data.overlay = chart.makeNestedData(currentIDs);
+        volcano.data.overlay = volcano.makeNestedData(currentIDs);
 
         //Draw brushed data.
-        chart.tables.drawSelected.multiplier = 1;
-        chart.tables.drawSelected(chart.data.brushed);
-        chart.tables.drawDetails();
+        volcano.tables.drawSelected.multiplier = 1;
+        volcano.tables.drawSelected(volcano.data.brushed);
+        volcano.tables.drawDetails();
 
         //Clear brush?
-        chart.data.nested.forEach(function(d) {
+        volcano.data.nested.forEach(function(d) {
             if (d.key != current.data()[0].key) {
-                d.overlay = chart.data.overlay.filter(function(e) {
+                d.overlay = volcano.data.overlay.filter(function(e) {
                     return e.key == d.key;
                 })[0].hexData;
             } else {
@@ -32,17 +33,16 @@ export function end(chart) {
             }
         });
     } else {
-        chart.wrap.classed('brushed', false);
-        chart.data.nested.forEach(function(d) {
+        volcano.wrap.classed('brushed', false);
+        volcano.data.nested.forEach(function(d) {
             d.overlay = [];
         });
 
         //Clear tables.
-        chart.tables.drawSelected.multiplier = 1;
-        chart.tables.drawSelected([]);
-        chart.tables.drawDetails();
+        volcano.tables.drawSelected.multiplier = 1;
+        volcano.tables.drawDetails();
 
-        chart.wrap
+        volcano.wrap
             .selectAll('g.brush')
             .select('rect.extent')
             .attr('height', 0)

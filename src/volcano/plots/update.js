@@ -7,7 +7,7 @@ export function update() {
 
     multiple.wrap.selectAll('g.hexGroup').remove();
 
-    multiple.brush.wrap
+    multiple.svg
         .select('rect.extent')
         .attr('height', 0)
         .attr('width', 0);
