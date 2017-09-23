@@ -515,6 +515,33 @@
         });
     }
 
+    function update() {
+        //clear stuff
+        var multiple = this;
+        var plots = this.parent;
+        var volcano = this.parent.parent;
+        var settings = volcano.config;
+
+        multiple.wrap.selectAll('g.hexGroup').remove();
+
+        console.log(multiple);
+        multiple.brush.wrap
+            .select('rect.extent')
+            .attr('height', 0)
+            .attr('width', 0);
+
+        multiple.wrap.datum(multiple.data);
+        multiple.svg.datum(multiple.data);
+        multiple.drawHexes();
+        /*/bind the new data
+    volcano.plots.multiples.forEach(function(m) {
+        var current = chart.data.nested.filter(f => f.key == m.key);
+        m.wrap.data(current);
+        this.drawHexes();
+    });
+    */
+    }
+
     function init$2() {
         var brush = this;
         var multiple = this.parent;
@@ -569,7 +596,7 @@
             .classed('selected', false);
     }
 
-    function update(chart) {
+    function update$1(chart) {
         var settings = chart.config;
         var plots = chart.plots;
         var current = d3.select(this.parentNode.parentNode);
@@ -657,59 +684,29 @@
         });
     }
 
-    var brush = {
-        init: init$2,
-        start: start,
-        update: update,
-        end: end
-    };
-
-    function update$1() {
-        //clear stuff
-        var multiple = this;
-        var plots = this.parent;
-        var volcano = this.parent.parent;
-        var settings = volcano.config;
-
-        multiple.wrap.selectAll('g.hexGroup').remove();
-
-        multiple.brush.wrap
-            .select('rect.extent')
-            .attr('height', 0)
-            .attr('width', 0);
-
-        multiple.wrap.datum(multiple.data);
-        multiple.svg.datum(multiple.data);
-        multiple.drawHexes();
-        /*/bind the new data
-    volcano.plots.multiples.forEach(function(m) {
-        var current = chart.data.nested.filter(f => f.key == m.key);
-        m.wrap.data(current);
-        this.drawHexes();
-    });
-    */
-    }
-
     //create the small multiples
     function createMultiples() {
         var plots = this;
         var volcano = this.parent;
 
         plots.multiples = volcano.data.nested.map(function(d, i) {
-            console.log(d);
             var multiple = {
                 index: i,
                 layout: layout$1,
                 drawAxis: drawAxis,
                 drawHexes: drawHexes,
-                brush: brush,
-                update: update$1
+                update: update,
+                brush: {
+                    init: init$2,
+                    start: start,
+                    update: update$1,
+                    end: end
+                }
             };
 
             multiple.parent = plots;
             multiple.volcano = volcano;
             multiple.label = d.key;
-
             multiple.data = d;
 
             return multiple;
