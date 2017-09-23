@@ -688,6 +688,7 @@
         //draw hex overlays
         plots.multiples.forEach(function(m) {
             m.drawHexes(true);
+            m.highlight.init();
         });
     }
 
