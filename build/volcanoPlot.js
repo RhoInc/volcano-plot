@@ -665,7 +665,6 @@
 
             //Draw brushed data.
             volcano.tables.drawSelected.multiplier = 1;
-            //  volcano.data.table = makeTableData(volcano.data.brushed)
             volcano.tables.drawSelected(volcano.data.brushed);
             volcano.tables.drawDetails();
 
