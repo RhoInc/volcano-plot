@@ -8,8 +8,16 @@ export function makeNestedData(ids) {
         data = data.filter(d => idset.has(d[settings.id_col.value_col]));
     }
 
-    //Attach brushed data to data object.
-    chart.data.brushed = data;
+    //Attach brushed data to data object with one record per ID.
+    chart.data.brushed = d3
+        .nest()
+        .key(d => d[settings.id_col.value_col])
+        .entries(data)
+        .map(function(d) {
+            return d.values[0];
+        });
+    console.log(data);
+    console.log(chart.data.brushed);
 
     var nested = d3
         .nest()

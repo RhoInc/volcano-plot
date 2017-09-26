@@ -232,8 +232,18 @@
             });
         }
 
-        //Attach brushed data to data object.
-        chart.data.brushed = data;
+        //Attach brushed data to data object with one record per ID.
+        chart.data.brushed = d3
+            .nest()
+            .key(function(d) {
+                return d[settings.id_col.value_col];
+            })
+            .entries(data)
+            .map(function(d) {
+                return d.values[0];
+            });
+        console.log(data);
+        console.log(chart.data.brushed);
 
         var nested = d3
             .nest()
@@ -655,6 +665,7 @@
 
             //Draw brushed data.
             volcano.tables.drawSelected.multiplier = 1;
+            //  volcano.data.table = makeTableData(volcano.data.brushed)
             volcano.tables.drawSelected(volcano.data.brushed);
             volcano.tables.drawDetails();
 
