@@ -981,6 +981,14 @@
         tables.drawDetails(d);
     }
 
+    function onMouseover(d, volcano) {
+        console.log('row mouseover');
+    }
+
+    function onMouseover$1(d, volcano) {
+        console.log('row mouseout');
+    }
+
     function drawSelected(data) {
         var _this = this;
 
@@ -994,6 +1002,7 @@
             .select('#gimme-moar')
             .classed('hidden', data.length < 25 * this.selected.multiplier);
         var tables = this,
+            volcano = this.parent,
             rows = this.selected.table
                 .select('tbody')
                 .selectAll('tr.selected')
@@ -1008,6 +1017,12 @@
                 .on('click', function(d) {
                     rows.classed('active', false);
                     onClick.call(this, d, tables);
+                })
+                .on('mouseover', function(d) {
+                    onMouseover.call(this, d, volcano);
+                })
+                .on('mouseout', function(d) {
+                    onMouseover$1.call(this, d, volcano);
                 });
 
         //Append data rows.

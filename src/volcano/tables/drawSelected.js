@@ -1,4 +1,7 @@
 import onClick from './drawSelected/onClick';
+import onMouseover from './drawSelected/onMouseover';
+import onMouseout from './drawSelected/onMouseout';
+
 export default function drawSelected(data) {
     this.selected.data = data;
     this.selected.wrap.selectAll('.nSelected').text(data.length);
@@ -10,6 +13,7 @@ export default function drawSelected(data) {
         .select('#gimme-moar')
         .classed('hidden', data.length < 25 * this.selected.multiplier);
     const tables = this,
+        volcano = this.parent,
         rows = this.selected.table
             .select('tbody')
             .selectAll('tr.selected')
@@ -20,6 +24,12 @@ export default function drawSelected(data) {
             .on('click', function(d) {
                 rows.classed('active', false);
                 onClick.call(this, d, tables);
+            })
+            .on('mouseover', function(d) {
+                onMouseover.call(this, d, volcano);
+            })
+            .on('mouseout', function(d) {
+                onMouseout.call(this, d, volcano);
             });
 
     //Append data rows.
